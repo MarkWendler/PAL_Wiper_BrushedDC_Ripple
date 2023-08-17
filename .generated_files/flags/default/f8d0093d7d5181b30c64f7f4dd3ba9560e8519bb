@@ -1,1 +1,0 @@
- -c -mcpu=$(MP_PROCESSOR_OPTION)      -mno-eds-warn  -g -omf=elf -DXPRJ_default=$(CND_CONF)    $(COMPARISON_BUILD)  -O0 -msmart-io=1 -Wall -msfr-warn=off    -mdfp="${DFP_DIR}/xc16"C:\Users\M67904\Desktop\Wiper motor project\Wiper_DC_project_v1.X\mcc_generated_files\opa\src\opa1.c
