@@ -457,6 +457,7 @@ int main(void)
     mySetup.clkSpeed = 100000; //100kHz
     
     SYSTEM_Initialize();
+	X2Cscope_Init();
     ADC1_ChannelCallbackRegister(&User_ADC1_ChannelCallback);
 
     
