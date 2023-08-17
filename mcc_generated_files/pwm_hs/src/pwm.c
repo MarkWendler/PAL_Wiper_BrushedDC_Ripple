@@ -314,10 +314,17 @@ void PWM_Initialize (void)
     
     PWM_GeneratorEOCEventCallbackRegister(&PWM_GeneratorEOCEventCallback);
     
+    PG1IOCONLbits.OVRDAT = 1;
+    PG2IOCONLbits.OVRDAT = 1;
+    PG2IOCONL = 0x3600; //drive the LOW side permanently ON
     
+        //PGxTRIGA compare event as trigger for ADC Trigger 1
+//    PG2EVTLbits.ADTR1EN1 = 1;
+//    //PGxTRIGB compare event as trigger source for ADC Trigger 2
+//    PG2EVTHbits.ADTR2EN2 = 1;
 
-    PG1CONLbits.ON = 1;
-    PG2CONLbits.ON = 1;
+//    PG1CONLbits.ON = 1;
+//    PG2CONLbits.ON = 1;
 }
 
 void PWM_Deinitialize (void)
