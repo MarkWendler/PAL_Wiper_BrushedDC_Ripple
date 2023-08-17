@@ -177,21 +177,21 @@ void UART2_Initialize(void)
     UART2_ParityErrorCallbackRegister(&UART2_ParityErrorCallback);
 
     // UART Frame error interrupt
-    U2STAbits.FERIE = 1;
+//    U2STAbits.FERIE = 1;
     // UART Parity error interrupt
-    U2STAbits.PERIE = 1;
+//    U2STAbits.PERIE = 1;
     // UART Receive Buffer Overflow interrupt
-    U2STAbits.OERIE = 1;
+//    U2STAbits.OERIE = 1;
     // UART Transmit collision interrupt
-    U2STAbits.TXCIE = 1;
+//    U2STAbits.TXCIE = 1;
     // UART Auto-Baud Overflow interrupt
-    U2STAbits.ABDOVE = 1;  
+//    U2STAbits.ABDOVE = 1;  
     // UART Receive Interrupt
     IEC1bits.U2RXIE = 1;
     // UART Event interrupt
-    IEC11bits.U2EVTIE = 1;
+//    IEC11bits.U2EVTIE = 1;
     // UART Error interrupt
-    IEC3bits.U2EIE    = 1;
+//    IEC3bits.U2EIE    = 1;
     
     //Make sure to set LAT bit corresponding to TxPin as high before UART initialization
     U2MODEbits.UARTEN = 1;   // enabling UART ON bit
