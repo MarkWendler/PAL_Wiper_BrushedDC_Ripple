@@ -39,17 +39,16 @@
 #include "../../adc/adc1.h"
 #include "../../cmp/cmp1.h"
 #include "../dmt.h"
+#include "../../i2c_host/i2c1.h"
 #include "../../opa/opa1.h"
 #include "../../opa/opa2.h"
 #include "../../opa/opa3.h"
 #include "../../pwm_hs/pwm.h"
-#include "../../timer/sccp1.h"
 #include "../../timer/tmr1.h"
 #include "../../uart/uart1.h"
 #include "../../uart/uart2.h"
 #include "../interrupt.h"
 #include "../../mcp802x/MCP802X_task.h"
-#include "../../X2CScope/X2CScope.h"
 
 
 void SYSTEM_Initialize(void)
@@ -59,18 +58,17 @@ void SYSTEM_Initialize(void)
     ADC1_Initialize();
     CMP1_Initialize();
     DMT_Initialize();
+    I2C1_Initialize();
     OPA1_Initialize();
     OPA2_Initialize();
     OPA3_Initialize();
     PWM_Initialize();
-    SCCP1_Timer_Initialize();
     TMR1_Initialize();
     UART1_Initialize();
     UART2_Initialize();
     INTERRUPT_GlobalEnable();
     INTERRUPT_Initialize();
     MCP802X_vidInitDriver();
-    X2Cscope_Init();
 }
 
 /**

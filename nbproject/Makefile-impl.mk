@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=Wiper_DC_project_v1.X
+PROJECTNAME=brusheddc_ripplecount_wiper
 
 # Active Configuration
 DEFAULTCONF=default

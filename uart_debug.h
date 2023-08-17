@@ -37,8 +37,9 @@
 
 #define MCP8021_ENABLE_DEBUG    0
 #define MAIN_ENABLE_DEBUG       0
-#define CURRENT_ENABLE_DEBUG    1
-#define SPEED_ENABLE_DEBUG      1
+#define CURRENT_ENABLE_DEBUG    0
+#define SPEED_ENABLE_DEBUG      0
+#define RUN_ON_EVAL_BOARD       0
 
 #if (MCP8021_ENABLE_DEBUG == 1)
     #define MCP8021_PRINTF(x)  printf(x)

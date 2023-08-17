@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include <xc.h>
 #include "X2CscopeComm.h"
-#include "../uart/uart2.h"
+#include "../mcc_generated_files/uart/uart1.h"
 
 /** 
   @brief
@@ -23,14 +23,14 @@ void sendSerial(uint8_t data)
 {
 
 #if defined (__dsPIC33E__)
-  U2TXREG = data;   
-
+  U1TXREG = data;   
+  
 #elif defined (__dsPIC33C__)
-  U2TXREG = data;   
-
+  U1TXREG = data;   
+  
 #elif defined (__PIC32M__)
-  U2TXREG = data;  
-
+  U1TXREG = data; 
+  
 #else
   #error "Please check device family or implement own interface."
 #endif
@@ -47,31 +47,30 @@ void sendSerial(uint8_t data)
 uint8_t receiveSerial()
 {
 #if defined (__dsPIC33E__)
-    if (U2STA & 0x0E) {
-        U2STAbits.OERR = 0; /* reset error */
+    if (U1STA & 0x0E) {
+        U1STAbits.OERR = 0; /* reset error */
         return (0);
     }
-    return U2RXREG;
- 
+    return U1RXREG; 
+
 #elif defined (__dsPIC33C__)
-    if ((U2STAbits.OERR == 1))
+    if ((U1STAbits.OERR == 1))
     {
-        U2STAbits.OERR = 0;
+        U1STAbits.OERR = 0;
         return(0);
     }
-    return U2RXREG;
+    return U1RXREG;
 
 #elif defined (__PIC32M__)
-    if (U2STA & 0x0E) {
-        U2STAbits.OERR = 0; /* reset error */
+    if (U1STA & 0x0E) {
+        U1STAbits.OERR = 0; /* reset error */
         return (0);
     }
-    return U2RXREG;
-
+    return U1RXREG;
+    
 #else
   #error "Please check device family or implement own interface."
 #endif
-
 
 }
 
@@ -85,18 +84,17 @@ uint8_t receiveSerial()
 uint8_t isReceiveDataAvailable()
 {
 #if defined (__dsPIC33E__)
-    return (U2STAbits.URXDA == 1);
+    return (U1STAbits.URXDA == 1);
 
 #elif defined (__dsPIC33C__)
-    return (U2STAHbits.URXBE == 0);
+    return (U1STAHbits.URXBE == 0);
   
 #elif defined (__PIC32M__)
-    return (U2STAbits.URXDA == 1);
-
+    return (U1STAbits.URXDA == 1);
+  
 #else
   #error "Please check device family or implement own interface."
 #endif
-
 
 
 }
@@ -112,16 +110,18 @@ uint8_t isReceiveDataAvailable()
 uint8_t isSendReady()
 {
 #if defined (__dsPIC33E__)
-    return (U2STAbits.UTXBF == 0); //TX Buffer full
+    return (U1STAbits.UTXBF == 0); //TX Buffer full
 
 #elif defined (__dsPIC33C__)
-    return (U2STAHbits.UTXBF == 0);//TX Buffer full
+    return (U1STAHbits.UTXBF == 0);//TX Buffer full
 
 #elif defined (__PIC32M__)
-    return (U2STAbits.UTXBF == 0); //TX Buffer full
+    return (U1STAbits.UTXBF == 0); //TX Buffer full
+  
 #else
   #error "Please check device family or implement own interface."
 #endif
+
 }
 /* *****************************************************************************
  End of File

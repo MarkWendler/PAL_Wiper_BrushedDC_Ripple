@@ -18,112 +18,125 @@
     EXCEED AMOUNT OF FEES, IF ANY, YOU PAID DIRECTLY TO MICROCHIP FOR 
     THIS SOFTWARE.
 */
-#include "mcc_generated_files/X2Cscope/X2Cscope.h"
 #include "mcc_generated_files/system/system.h"
-#include "mcc_generated_files/mcp802x/mcp8021.h"
 #include "mcc_generated_files/mcp802x/MCP802X_task.h"
 #include "mcc_generated_files/timer/tmr1.h"
+#include "mcc_generated_files/system/pins.h"
 #include "mcc_generated_files/adc/adc1.h"
-#include "uart_debug.h"
+#include "mcc_generated_files/pwm_hs/pwm.h"
+#include "mcc_generated_files/uart/uart1.h"
+#include "mcc_generated_files/i2c_host/i2c1.h"
+#include "mcc_generated_files/i2c_host/i2c_host_types.h"
+#include "X2Cscope/X2Cscope.h"
+#include "UART_debug.h"
 
-// Specify bootstrap charging time in Seconds (mention at least 10mSecs)
-#define BOOTSTRAP_CHARGING_TIME_SECS 0.01
-  /* Specify PWM Period in seconds, (1/ PWMFREQUENCY_HZ) */
-#define LOOPTIME_SEC            0.00005
+void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal);
 
-// Calculate Bootstrap charging time in number of PWM Half Cycles
-#define BOOTSTRAP_CHARGING_COUNTS (uint16_t)((BOOTSTRAP_CHARGING_TIME_SECS/LOOPTIME_SEC )* 2)
+#define HYSTERESIS_UPDATE_INTERVAL   80
+#define SPEED_MEASUREMENT_INTERVAL   25
 
-// MC PWM MODULE Related Definitions
-#define INVERTERA_PWM_PDC1      PG1DC
-#define INVERTERA_PWM_PDC2      PG2DC
-#define INVERTERA_PWM_PDC3      PG3DC
-    
-/* Specify PWM Period in micro seconds */
-#define LOOPTIME_MICROSEC       50
-/* Specify dead time in micro seconds */
-#define DEADTIME_MICROSEC       1
 
-#define FOSC_MHZ 20000000
+#define MAX_DUTY_CYCLE               4500
+#define MIN_DUTY_CYCLE               500
 
-// loop time in terms of PWM clock period
-#define LOOPTIME_TCY            (uint16_t)(((LOOPTIME_MICROSEC*FOSC_MHZ)/2)-1)
-       
-#define DDEADTIME               (uint16_t)(DEADTIME_MICROSEC*FOSC_MHZ)
+//uint16_t postscaler = POSTSCALER;
 
-#define MCP802X_ENABLE_SetHigh()          (_LATC13 = 1)
-#define MCP802X_ENABLE_SetLow()           (_LATC13 = 0)
-
-#define MAX_BUF  1750 //3500
-
-MCP802X_STATE mcp8021_CommState;
-
-#define FCY 200000000
+#define FCY 200000000  // System Clock
 #include <libpic30.h>
 #include <stdio.h>
-/*
-    Main application
-*/
-void PWMInitialization2(void);
-void ChargeBootstarpCapacitors(void);
-volatile uint16_t faultHappen = 0;
-volatile uint16_t mcp802x_warnings = 0;
-volatile uint16_t mcp802x_mode = 0;
 
-volatile uint16_t sum = 0;
-volatile uint16_t avg = 0;
-volatile uint16_t cnt_speed = 0;
-volatile uint16_t cnt_1sec = 20000;
+//volatile uint16_t faultHappen = 0;
+//volatile uint16_t mcp802x_warnings = 0;
+//volatile uint16_t mcp802x_mode = 0;
 
-extern uint16_t adcVal;
-//volatile float current = 1;
-volatile int16_t current = 1;
+//volatile uint16_t sum = 0;
+//volatile uint16_t avg = 0;
+//volatile uint16_t cnt_speed = 0;
+//volatile uint16_t cnt_1sec = 20000;
 
-volatile uint16_t current_buff[MAX_BUF];
-volatile uint16_t output_buff[MAX_BUF];
-volatile uint16_t index_acq = 0;
-volatile uint16_t index_send_data = 0;
-volatile uint16_t start_acq = 0; 
-volatile uint16_t start_send_data = 0; 
-volatile uint16_t prev_io_state = 0; 
-volatile uint16_t debounce = 0; 
 
-volatile uint16_t speed_cnt = 0; 
-volatile uint16_t speed_cnt_2 = 0; 
+//volatile uint16_t index_acq = 0;
+//volatile uint16_t index_send_data = 0;
+//volatile uint16_t start_acq = 0; 
+//volatile uint16_t start_send_data = 0; 
+//volatile uint16_t prev_io_state = 0; 
+//volatile uint16_t debounce = 0; 
+
+//--------- speed measurement variables --------------------
+volatile uint16_t hysteresis_update_counter = 0; 
+volatile uint16_t speed_measurement_counter = 0; 
 volatile uint16_t current_min = 4095; 
 volatile uint16_t current_max = 0;
 volatile uint16_t current_pp = 4095; 
-volatile uint16_t speed = 0; 
-volatile uint16_t ripple = 0; 
+volatile uint16_t ripple_counter = 0; 
 volatile uint16_t hyst_thresh_hi = 0; 
 volatile uint16_t hyst_thresh_lo = 0; 
-volatile uint16_t cmp_output = 0; 
-volatile uint16_t new_speed_flag = 0; 
+volatile uint16_t digital_comparator_output = 0; 
+volatile uint16_t new_speed_flag = 0;
 
-void print_CommState( MCP802X_STATE CommState )
-{
+//--------- gate driver status reading implementation --------------------
+volatile MCP802X_STATE              mcp8021_CommState;
+volatile MCP802X_STATE              mcp8021_communicate_status;
+         MCP802X_POWER_STATUS_FLAGS mcp8021_power_status;
+volatile bool                       mcp8021_power_status_event;
+volatile uint16_t                   mcp8021_faults = 0;
+volatile uint16_t                   mcp8021_warnings;
+volatile uint16_t                   mcp8021_fault_pin_state = 0; 
+uint8_t u8PowerStatus;
+extern uint16_t adcVal;
 
-    switch(CommState)
-    {
-        case MCP802X_UNINITIALIZED:
-            MAIN_PRINTF("CommState = UNINITIALIZED" );
-            break;
-        case MCP802X_INITIALIZATION:
-            MAIN_PRINTF("CommState = INITIALIZATION" );
-            break;
-        case MCP802X_READY:
-            MAIN_PRINTF("nCommState = READY" );
-            break;
-        case MCP802X_ERROR:
-            MAIN_PRINTF("nCommState = ERROR" );
-            break;
-        default:
-        {
-            MAIN_PRINTF("CommState = UNKNOWN" );
-        }
-    }
-}
-    
+volatile uint16_t dir_cmd = 0;
+volatile uint16_t dir_old = 0;
+volatile uint16_t start_old = 0;
+volatile uint16_t start_cmd = 0;
+
+volatile uint16_t cmd_motor_speed_rpm = 0;
+volatile uint16_t cmd_motor_direction = 0;
+volatile uint16_t cmd_motor_stop      = 0;
+
+volatile uint16_t motor_current                = 0;
+volatile uint16_t motor_speed                  = 0; 
+volatile uint16_t cmd_motor_voltage_duty_cycle = 0; 
+volatile uint16_t motor_voltage_duty_cycle     = 0; 
+volatile uint16_t motor_voltage_slope_counter  = 0; 
+
+volatile uint16_t DC_bus_voltage       = 0;
+volatile uint16_t Speed1_digital_input = 0;
+volatile uint16_t Brake_digital_input  = 0;
+
+volatile uint16_t new_duty_cycle = 0;
+
+volatile uint16_t old_direction = 0;
+volatile uint16_t is_motor_run = 0;
+
+uint16_t prev_io_state = 1;
+uint16_t io_debounce = 0;
+uint16_t test_speed = 0;
+uint16_t test_direction = 0;
+
+// 1 milliseconds task variables
+#define TASK_EXECUTION_PERIOD          20 // 20 * PWM_PERIOD = 20 * 50us = 1 ms
+volatile uint16_t task_counter       = TASK_EXECUTION_PERIOD;
+volatile uint16_t task_execute_flag  = 0;
+
+
+//--------- gate driver status reading implementation --------------------
+
+volatile uint16_t timer_ms_counter = 0;
+
+uint16_t device_addr  = 0x35;
+uint8_t write_data[1]   = {0x13}; 
+uint8_t read_data[1]    = {0x00};
+
+bool IsSensorReadFinished   = false;
+bool IsSensorReadInProgress = false;
+
+uint32_t sysClk = FCY;
+
+#define START_TIMER_MS(tmr_counter, x) tmr_counter = x;
+#define IS_TIMER_MS_ELAPSED(tmr_counter) (tmr_counter == 0)
+
+
 void mcp8x_clear_fault()
 {
     MCP802X_ENABLE_SetLow(); //disable the gate driver 
@@ -131,378 +144,507 @@ void mcp8x_clear_fault()
     MCP802X_ENABLE_SetHigh(); //enable the gate driver 
 }
 
-void start_acquisition()
+//void change_direction()
+//{
+//    //disable PWM generators
+//        PG1CONLbits.ON = 0;
+//        PG2CONLbits.ON = 0;
+//    
+//        __delay_us(10);
+//    //change the mode of the operation    
+//        PG1IOCONL = PG1IOCONL ^ PG2IOCONL;
+//        PG2IOCONL = PG1IOCONL ^ PG2IOCONL;
+//        PG1IOCONL = PG1IOCONL ^ PG2IOCONL;
+//        
+//        __delay_us(10);
+//    //enable PWM generators
+//        PG1CONLbits.ON = 1;
+//        PG2CONLbits.ON = 1;       
+//}
+void pwm_stop( void )
 {
-    if(start_acq == 0)
-    {
-        printf("\r\n START ACQUISITION \r\n");
-        start_send_data = 0;
-        index_acq = 0;
-        start_acq = 1;
-    }
-}
-void acq_send_data()
-{
-    if((start_send_data == 1) && (index_send_data < MAX_BUF))
-    {
-        CURRENT_PRINTF_VAR("%d; ", index_send_data);
-        CURRENT_PRINTF_VAR("%d; ", current_buff[ index_send_data ]);
-        CURRENT_PRINTF_VAR("%d;\r\n", output_buff[ index_send_data++ ]);
-    }
-    else
-    {
-        start_send_data = 0;
-        if(new_speed_flag)
-        {
-            CURRENT_PRINTF_VAR("Speed = %d\r\n", speed);
-            new_speed_flag = 0;
-        }
-    }
+    PG1CONLbits.ON = 0;
+    PG2CONLbits.ON = 0;
+
+    __delay_us(200);
 }
 
-void mcp8021_service()
+void pwm_change_direction( uint16_t new_direction )
 {
-    //mcp8021_CommState = MCP802X_eHandleCommunication();
-
-    MAIN_PRINTF("\r\n");
-    print_CommState( mcp8021_CommState );
-
-    if ( PORTDbits.RD1 == 0 )
+    if ( old_direction != new_direction )
     {
-        MAIN_PRINTF(" fault_pin = FAULT" );
-    }
-    else
-    {
-        MAIN_PRINTF(" fault_pin = no fault" );
-    }
-
-    faultHappen = MCP802X_u16GetLastMcpFaults();
-
-    if (faultHappen != 0)
-    {
-        MAIN_PRINTF_VAR(" FAULT = %04X", faultHappen );
-    }
-    mcp802x_warnings = MCP802X_u16GetWarnings();
-    MAIN_PRINTF_VAR(" WARNINGS = %04X", mcp802x_warnings );
-
-    mcp802x_mode = MCP802X_sGetMode();
-    MAIN_PRINTF_VAR(" MODE = %04X", mcp802x_mode );
-
-    if ( PORTDbits.RD1 == 0 ) // read FAULT pin
-    {
-        // button pressed
-        mcp8x_clear_fault();
-        MAIN_PRINTF("  CLEAR FAULT  " );
-    }
-//    SPEED_PRINTF_VAR("speed = %d ", speed );
-//    SPEED_PRINTF_VAR("duty = %d ", PG1DC );
-//    SPEED_PRINTF_VAR("current = %d ", current );
-//    SPEED_PRINTF_VAR("ripple = %d ", ripple );
-//    SPEED_PRINTF_VAR("counter 2 = %d ", speed_cnt_2 );
-////    SPEED_PRINTF_VAR("The counter 1 is %d ", speed_cnt);
-//    SPEED_PRINTF_VAR("diff =  %d ", current_pp );
-//    SPEED_PRINTF_VAR("min = %d ", current_min );
-//    SPEED_PRINTF_VAR("max = %d ", current_max );
-//    SPEED_PRINTF("\r\n");
-////    SPEED_PRINTF("\r\n");
-    
-}
-
-void change_direction()
-{
-    //disable PWM generators
         PG1CONLbits.ON = 0;
         PG2CONLbits.ON = 0;
-    
-        __delay_ms(150);
-    //change the mode of the operation    
-        PG1IOCONL = PG1IOCONL ^ PG2IOCONL;
-        PG2IOCONL = PG1IOCONL ^ PG2IOCONL;
-        PG1IOCONL = PG1IOCONL ^ PG2IOCONL;
-        
-        __delay_ms(150);
-    //enable PWM generators
-        PG1CONLbits.ON = 1;
-        PG2CONLbits.ON = 1;       
-        
-        MAIN_PRINTF(" DIRECTION CHANGED " );
-}
 
-int main(void)
-{
-    SYSTEM_Initialize();
-    __delay_ms(300);
-    __delay_ms(300);
-    __delay_ms(300);
-
- 
-    printf("\r\n *** START ***** \r\n");
-    __delay_ms(100);
-    
-    MCP802X_u8ConfigSet(config1);
-    //ChargeBootstarpCapacitors();
-    MCP802X_ENABLE_SetHigh(); //enable the gate driver 
-    
-    do
-    {
-        mcp8021_service();
-        if ( PORTDbits.RD13 == 0 ) // read SW2
-        {
-        // button pressed
-            change_direction();
-        }
+        __delay_us(200);
         
-        if ( PORTDbits.RD8 == 0 && prev_io_state == 1 && debounce == 0) // read SW1
+        if( new_direction == 0 )
         {
-        // button pressed
-            
-            start_acquisition();
-            
-            prev_io_state = 0;
-            debounce = 100;
+            PG1IOCONLbits.OVRENH = 0;
+            PG1IOCONLbits.OVRENL = 0;
+
+            PG2IOCONLbits.OVRENH = 1;
+            PG2IOCONLbits.OVRENL = 1;     
         }
         else
         {
-            prev_io_state = 1;
-            if(debounce>0)
-            {
-                debounce--;
-            }
-        }
-    
-        acq_send_data();
-    
-        //MAIN_PRINTF_VAR("\r\n Motor current = %d\r\n", current);
-        //MAIN_PRINTF("\r\n Motor crt = ");
-        //printf(0xAA);
-        //MAIN_PRINTF_VAR("%i", current);
-        //printf(0x55);
-        //MAIN_PRINTF("\r\n");
-        //MAIN_PRINTF_VAR("\r\n Motor current = %04X\r\n", adcVal);
-        //CURRENT_PRINTF_VAR("%d\r\n", current);
-        //__delay_ms(5);
-        
-        //X2CScope_Update();
-        
-        X2CScope_Communicate();
-    }
-    while( mcp8021_CommState != MCP802X_READY );
-    
-    TMR1_Start();
-    MAIN_PRINTF("\r\nCommState = MCP802X_READY" );
+            PG1IOCONLbits.OVRENH = 1;
+            PG1IOCONLbits.OVRENL = 1;
 
-    //__delay_ms(50);
+            PG2IOCONLbits.OVRENH = 0;
+            PG2IOCONLbits.OVRENL = 0;      
+        }
+        
+        __delay_us(200);
+
+        PG1CONLbits.ON = 1;
+        PG2CONLbits.ON = 1;
+    }
     
+    old_direction = new_direction;
+}
+
+void motor_command( uint16_t speed_rpm, uint16_t direction)
+{
+    new_duty_cycle = speed_rpm;  // scaling 1 to 1 (4500 rpm = 4500 duty)
+    
+    if( new_duty_cycle >= 0)
+    {
+        PG1CONLbits.ON = 1;
+        PG2CONLbits.ON = 1;
+        
+        is_motor_run = 1;
+        
+        if( new_duty_cycle > MAX_DUTY_CYCLE )
+        {
+            cmd_motor_voltage_duty_cycle = MAX_DUTY_CYCLE;
+        }
+        else
+        {
+            if( new_duty_cycle < MIN_DUTY_CYCLE )
+                cmd_motor_voltage_duty_cycle = MIN_DUTY_CYCLE;
+            else
+                cmd_motor_voltage_duty_cycle = new_duty_cycle;
+        }
+        
+        
+//        if( direction == 1 && old_direction != direction)
+//        {
+//            PG1CONLbits.ON = 0;
+//            PG2CONLbits.ON = 0;
+//
+//            __delay_us(200);
+//        
+//            PG1IOCONLbits.OVRENH = 0;
+//            PG1IOCONLbits.OVRENL = 0;
+//
+//            PG2IOCONLbits.OVRENH = 1;
+//            PG2IOCONLbits.OVRENL = 1;     
+//            
+//            __delay_us(200);
+//            
+//            PG1CONLbits.ON = 1;
+//            PG2CONLbits.ON = 1;
+//        }
+//        if( direction == 0 && old_direction != direction)
+//        {
+//            PG1CONLbits.ON = 0;
+//            PG2CONLbits.ON = 0;
+//
+//            __delay_us(200);
+//        
+//            PG1IOCONLbits.OVRENH = 1;
+//            PG1IOCONLbits.OVRENL = 1;
+//
+//            PG2IOCONLbits.OVRENH = 0;
+//            PG2IOCONLbits.OVRENL = 0;      
+//            
+//            __delay_us(200);
+//            
+//            PG1CONLbits.ON = 1;
+//            PG2CONLbits.ON = 1;
+//        }
+//        __delay_us(200);
+       
+    }
+    else
+    {
+        PG1CONLbits.ON = 0;
+        PG2CONLbits.ON = 0;
+
+        __delay_us(200);        
+    }
+//    old_direction = direction;
+}
+
+void app_task_1ms()
+{
+//    #if (RUN_ON_EVAL_BOARD == 1)
+//            LATBbits.LATB0 = 1;
+//    #endif
+
+    mcp8021_communicate_status = MCP802X_eHandleCommunication(); 
+    
+    //mcp8021_power_status = MCP802X_u16GetLastMcpFaults();
+    mcp8021_power_status_event = MCP802X_PowerStatusGet( &mcp8021_power_status );
+    
+    if(mcp8021_faults == 0 ) //do not override the gate drive fault, store the first error
+    { 
+        mcp8021_faults = MCP802X_u16GetLastMcpFaults();
+    }
+    
+    mcp8021_warnings = MCP802X_u16GetWarnings();
+
+    //motor_command( 1000, 0 );
+    
+    if ( PORTDbits.RD8 == 0 )
+    {
+        // sw1 button pressed
+        if ( prev_io_state == 0 )
+        {
+            if ( io_debounce == 0 )
+            {
+                test_speed += 1000;
+
+                if( test_speed > 4500 )
+                {
+                    test_speed = MIN_DUTY_CYCLE;
+                    test_direction = !test_direction;
+                }
+
+                motor_command( test_speed, test_direction );
+            }
+
+            if( io_debounce >= 0)
+                io_debounce--;
+        }
+        else
+        {
+            io_debounce = 100;
+        }
+        prev_io_state = 0;
+    }
+    else
+    {
+        prev_io_state = 1;
+    }
+    
+    
+//    if( (motor_voltage_slope_counter %2) == 0)
+//    {
+        if (motor_voltage_duty_cycle < cmd_motor_voltage_duty_cycle)
+            motor_voltage_duty_cycle += 4;
+        else
+        {
+            if (motor_voltage_duty_cycle > cmd_motor_voltage_duty_cycle)
+                motor_voltage_duty_cycle -= 4;
+        }
+//    }
+    
+    motor_voltage_slope_counter++;
+    
+    if( motor_voltage_duty_cycle == MIN_DUTY_CYCLE )
+    {
+        pwm_change_direction( test_direction );
+        
+        if( is_motor_run )
+        {
+            pwm_stop();
+            is_motor_run = 0;
+        }
+    }
+
+
+    
+//    switch(mcp8021_communicate_status)
+//    {
+//        case MCP802X_UNINITIALIZED: //!< no communication had been issued unti now
+//            break;
+//            
+//        case MCP802X_INITIALIZATION: //!< System Initialization Stage
+//            
+//            if(dir_cmd == 1)
+//            {
+//                //dir_old = ~dir_old;
+//                dir_cmd = 0;
+//                //change_direction();
+//                
+//                PG1CONLbits.ON = 0;
+//                PG2CONLbits.ON = 0;
+//                
+//                __delay_ms(10);
+//                
+//                PG1IOCONLbits.OVRENH = ~PG1IOCONLbits.OVRENH;
+//                PG1IOCONLbits.OVRENL = ~PG1IOCONLbits.OVRENL;
+//                
+//                PG2IOCONLbits.OVRENH = ~PG2IOCONLbits.OVRENH;
+//                PG2IOCONLbits.OVRENL = ~PG2IOCONLbits.OVRENL;     
+//                
+//                __delay_ms(10);
+//                
+//                PG1CONLbits.ON = start_cmd; //to prevent accidentally change in direction when the motor is stopped
+//                PG2CONLbits.ON = start_cmd;
+//                //change_direction();
+//            }
+//            
+//            if(start_cmd == 1)
+//            {
+//                //start_old = ~start_old;
+//                start_cmd = 0;
+//                PG1CONLbits.ON = 1;
+//                PG2CONLbits.ON = 1;
+//            } 
+//            
+//            break;
+//            
+//        case MCP802X_READY:  //!< System is Ready
+//            
+//            if(dir_cmd == 1)
+//            {
+//                //dir_old = ~dir_old;
+//                dir_cmd--;
+//                //change_direction();
+//                
+//                PG1CONLbits.ON = 0;
+//                PG2CONLbits.ON = 0;
+//                
+//                __delay_ms(10);
+//                
+//                PG1IOCONLbits.OVRENH = ~PG1IOCONLbits.OVRENH;
+//                PG1IOCONLbits.OVRENL = ~PG1IOCONLbits.OVRENL;
+//                
+//                PG2IOCONLbits.OVRENH = ~PG2IOCONLbits.OVRENH;
+//                PG2IOCONLbits.OVRENL = ~PG2IOCONLbits.OVRENL;     
+//                
+//                __delay_ms(10);
+//                
+//                PG1CONLbits.ON = start_cmd; //to prevent accidentally change in direction when the motor is stopped
+//                PG2CONLbits.ON = start_cmd;
+//                //change_direction();
+//            }
+//            
+//            if(start_cmd == 1)
+//            {
+//                //start_old = ~start_old;
+//                start_cmd--;
+//                PG1CONLbits.ON = start_cmd;
+//                PG2CONLbits.ON = start_cmd;
+//            } 
+//            
+//            break;
+//            
+//        case MCP802X_ERROR:
+//            break; 
+//    }
+    
+    #if (RUN_ON_EVAL_BOARD == 1)
+
+    #else
+        Speed1_digital_input = PORTDbits.RD8; //check if the Speed1 is connected
+        Brake_digital_input = PORTDbits.RD13; //check if the Brake is connected
+    #endif // RUN_ON_EVAL_BOARD
+
+//    #if (RUN_ON_EVAL_BOARD == 1)
+//            LATBbits.LATB0 = 0;
+//    #endif
+}
+
+struct I2C_TRANSFER_SETUP mySetup;
+
+int main(void)
+{
+    
+    mySetup.clkSpeed = 100000; //100kHz
+    
+    SYSTEM_Initialize();
+    ADC1_ChannelCallbackRegister(&User_ADC1_ChannelCallback);
+
+    
+    motor_voltage_duty_cycle = MIN_DUTY_CYCLE; //set the initial duty cycle
+    
+    // Manually enable PWM to trigger ADC channels as MCC does not support by default
+    #if (RUN_ON_EVAL_BOARD == 1)
+        PWM_Trigger1Enable(PWM_GENERATOR_2,PWM_TRIGGER_COMPARE_A); 
+        
+//    TRISBbits.TRISB0   = 0; // B0 = output
+//    ANSELBbits.ANSELB0 = 0; // B0 = digital function
+
+    #else
+
+    #endif // RUN_ON_EVAL_BOARD
+   
+    //////////////////// read the MSB temperature register from the Hall sensor       
+//    I2C1_TransferSetup(&mySetup, sysClk);
+    
+    
+    
+    PG2TRIGB = PG2PER; // sampling point for the motor current at middle of PWM pulse
+    PWM_Trigger2Enable(PWM_GENERATOR_2,PWM_TRIGGER_COMPARE_B); //enable the sampling point for the motor current 
+    
+    MCP802X_u8ConfigSet(config1); //Set the basic configuration to the gate drive - Mandatory
+    MCP802X_ENABLE_SetHigh();     //enable the gate driver
+    
+    //while(gatedrive_communicate_status != MCP802X_READY ){} //wait until the gate driver is in the READY state
+
+    //printf("START\r\n");
+
+//    TRISBbits.TRISB9 = 0;
+//    LATBbits.LATB9 = 1;
+//    LATBbits.LATB9 = 0;
+
     while(1)
     {
-        X2CScope_Communicate();
+        //LATBbits.LATB0 = 1;
+        X2CScope_Communicate(); //handles the communication with the MPLAB X plugin on the PC side
+        //LATBbits.LATB0 = 0;
+
+        //////////////////// TASK - 1 ms
+        if(task_execute_flag)
+        {
+            task_execute_flag = 0;
+            app_task_1ms();
+        }
+        //////////////////// 
+
+        
+        //////////////////// check read
+        if( IsSensorReadInProgress )
+        {
+            if( IsSensorReadFinished == true )
+            {
+                if( I2C_HOST_ERROR_NONE == I2C1_ErrorGet() )
+                {
+                    //printf("\r\nSensor Data: %02X", read_data[0] );
+                }
+                else
+                {
+                    //printf( "\r\nI2C error" );
+                }
+
+                IsSensorReadInProgress = false;
+            }
+        }
+        else
+        {
+            IsSensorReadFinished = false;
+            IsSensorReadInProgress = true;
+
+            I2C1_Read(device_addr, read_data , 1);   
+            //I2C1_WriteRead(device_addr, write_data, 1, read_data , 1);   
+        }
+        //////////////////// 
     }    
 }
 
 
-void ChargeBootstarpCapacitors(void)
+/////////////// Timer1 handles the DE2 gate driver communication
+void TMR1_TimeoutCallback()
 {
-    uint16_t i = BOOTSTRAP_CHARGING_COUNTS;
-    uint16_t prevStatusCAHALF = 0,currStatusCAHALF = 0;
-    uint16_t k = 0;
     
-    // Enable PWMs only on PWMxL ,to charge bootstrap capacitors at the beginning
-    // Hence PWMxH is over-ridden to "LOW"
-    PG3IOCONLbits.OVRDAT = 0;  // 0b00 = State for PWM3H,L, if Override is Enabled
-    PG2IOCONLbits.OVRDAT = 0;  // 0b00 = State for PWM2H,L, if Override is Enabled
-    PG1IOCONLbits.OVRDAT = 0;  // 0b00 = State for PWM1H,L, if Override is Enabled
-
-    PG3IOCONLbits.OVRENH = 1;  // 1 = OVRDAT<1> provides data for output on PWM3H
-    PG2IOCONLbits.OVRENH = 1;  // 1 = OVRDAT<1> provides data for output on PWM2H
-    PG1IOCONLbits.OVRENH = 1;  // 1 = OVRDAT<1> provides data for output on PWM1H
-
-    PG3IOCONLbits.OVRENL = 1;  // 1 = OVRDAT<0> provides data for output on PWM3L
-    PG2IOCONLbits.OVRENL = 1;  // 1 = OVRDAT<0> provides data for output on PWM2L
-    PG1IOCONLbits.OVRENL = 1;  // 1 = OVRDAT<0> provides data for output on PWM1L
-
-    // PDCx: PWMx GENERATOR DUTY CYCLE REGISTER
-    // Initialize the PWM duty cycle for charging
-    INVERTERA_PWM_PDC3 = LOOPTIME_TCY - (DDEADTIME/2 + 5);
-    INVERTERA_PWM_PDC2 = LOOPTIME_TCY - (DDEADTIME/2 + 5);
-    INVERTERA_PWM_PDC1 = LOOPTIME_TCY - (DDEADTIME/2 + 5);
+//    mcp8021_communicate_status = MCP802X_eHandleCommunication(); 
+//    
+//    //mcp8021_power_status = MCP802X_u16GetLastMcpFaults();
+//    mcp8021_power_status_event = MCP802X_PowerStatusGet( &mcp8021_power_status );
+//    
+//    if(mcp8021_faults == 0 ) //do not override the gate drive fault, store the first error
+//    { 
+//        mcp8021_faults = MCP802X_u16GetLastMcpFaults();
+//    }
+//    
+//    mcp8021_warnings = MCP802X_u16GetWarnings();
     
-    MAIN_PRINTF("start\r\n");
+    //////////////////// TASK - 1 ms
+//    task_counter--;
+//    if(task_counter== 0)
+//    {
+        task_execute_flag = 1;
+//        task_counter      = TASK_EXECUTION_PERIOD;
+//    }
+    //////////////////// 
     
-    while(i)
+    if( timer_ms_counter > 0 )
     {
-        //driver status
-        mcp8021_CommState = MCP802X_eHandleCommunication(); //call in a low priority timer interrupt
-        MAIN_PRINTF_VAR("status= %04X\r\n", mcp8021_CommState);
-        
-        prevStatusCAHALF = currStatusCAHALF;
-        currStatusCAHALF = PG3STATbits.CAHALF;
-        if (prevStatusCAHALF != currStatusCAHALF)
-        {
-            if (currStatusCAHALF == 0)
-            {
-                i--; 
-                k++;
-                if (i == (BOOTSTRAP_CHARGING_COUNTS - 50))
-                {
-                    // 0 = PWM generator provides data for PWM1L pin
-                    PG1IOCONLbits.OVRENL = 0;
-                }
-                else if (i == (BOOTSTRAP_CHARGING_COUNTS - 150))
-                {
-                    // 0 = PWM generator provides data for PWM2L pin
-                    PG2IOCONLbits.OVRENL = 0;  
-                }
-                else if (i == (BOOTSTRAP_CHARGING_COUNTS - 250))
-                {
-                    // 0 = PWM generator provides data for PWM3L pin
-                    PG3IOCONLbits.OVRENL = 0;  
-                }
-                if (k > 25)
-                {
-                    if (PG3IOCONLbits.OVRENL == 0)
-                    {
-                        if (INVERTERA_PWM_PDC3 > 2)
-                        {
-                            INVERTERA_PWM_PDC3 -= 2;
-                        }
-                        else
-                        {
-                           INVERTERA_PWM_PDC3 = 0; 
-                        }
-                    }
-                    if (PG2IOCONLbits.OVRENL == 0)
-                    {
-                        if (INVERTERA_PWM_PDC2 > 2)
-                        {
-                            INVERTERA_PWM_PDC2 -= 2;
-                        }
-                        else
-                        {
-                            INVERTERA_PWM_PDC2 = 0; 
-                        }
-                    }
-                    if (PG1IOCONLbits.OVRENL == 0)
-                    {
-                        if (INVERTERA_PWM_PDC1 > 2)
-                        {
-                            INVERTERA_PWM_PDC1 -= 2;
-                        }
-                        else
-                        {
-                            INVERTERA_PWM_PDC1 = 0; 
-                        }
-                    }
-                    k = 0;
-                } 
-            }
-        }
+        timer_ms_counter--;
     }
-    // PDCx: PWMx GENERATOR DUTY CYCLE REGISTER
-    // Initialize the PWM duty cycle for charging
-    INVERTERA_PWM_PDC3 = 0;
-    INVERTERA_PWM_PDC2 = 0;
-    INVERTERA_PWM_PDC1 = 0;
-
-    PG1IOCONLbits.OVRENH = 1;  // 0 = PWM generator provides data for PWM1H pin
-    PG1IOCONLbits.OVRDAT = 1;  // 0b00 = State for PWM3H,L, if Override is Enabled
-    PG2IOCONLbits.OVRENH = 0;  // 0 = PWM generator provides data for PWM1H pin
-    PG2IOCONLbits.OVRDAT = 0;  // 0b00 = State for PWM2H,L, if Override is Enabled
-    //PG2IOCONLbits.OVRDAT = 0;  // 0b00 = State for PWM3H,L, if Override is Enabled
 }
 
-void ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
+void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
 {
-    if(channel == Channel_AN15)
-    {
-        PG1DC = adcVal + 500;
-        PG2DC = adcVal + 500;
-//        PG1DC = 1500;
-//        PG2DC = 1500;
-//        LATAbits.LATA3 = ~LATAbits.LATA3;
-    }
+    LATBbits.LATB0 = 1;
+    
+    #if (RUN_ON_EVAL_BOARD == 1)
+        if(channel == Channel_AN15)
+        {
+            // set duty cycle from external potentiometer value
+            // scale the value from 4096 ==>> 4500 (90% duty cycle)
+            //PG1DC = adcVal * 1.1;
+            PG1DC = motor_voltage_duty_cycle;
+            PG2DC = PG1DC;
+        }       
+        
+        if(channel == Channel_AN12)
+        {
+            DC_bus_voltage = adcVal; //read the bus voltage
+        }  
+        
+    #else
+
+        PG1DC = motor_voltage_duty_cycle;
+        PG2DC = PG1DC;
+            
+        if(channel == Channel_AN2)
+        {
+            DC_bus_voltage = adcVal; //read the bus voltage
+        }  
+
+    #endif // RUN_ON_EVAL_BOARD
+    
 
     if(channel == Channel_AN7)
     {
-        LATBbits.LATB0 = 1;
-        //current = ((((float)adcVal - 2048)/4096)*3.3)*100;
-        current = adcVal;
-        //PG2TRIGA = 4500;//PG2DC * 1.5;
-        PG2TRIGB = PG2PER;
-        PG2TRIGA = 500;//0;
-        //LATAbits.LATA3 = ~LATAbits.LATA3;
-        //CURRENT_PRINTF_VAR("%d/n", current);
-        //CURRENT_PRINTF("A");
+        motor_current = adcVal; // read the value of the motor current
         
-        if((start_acq==1) && (index_acq < MAX_BUF))
-        {
-            current_buff[index_acq] =  current;
-            output_buff[index_acq] =  cmp_output;
+        #if (RUN_ON_EVAL_BOARD == 1)
+//            LATBbits.LATB0 = 1; // toggle this pin to check the interrupt duration
+            PG2TRIGA = 500; // trigger point for external potentiometer reading
+        #else
+        #endif // RUN_ON_EVAL_BOARD
+
+
+
+        //////////////////// SPEED MEASUREMENT - START
         
-            index_acq++;
-        }
-        else
+        if(hysteresis_update_counter < HYSTERESIS_UPDATE_INTERVAL) //verify if the first loop is done
         {
-            if(start_acq)
+            // Update Hysteresis Thresholds Period = HYSTERESIS_UPDATE_INTERVAL * PWM_PERIOD = 4000 us
+            // Detect the minimum and maximum motor current values
+            hysteresis_update_counter++;
+            if(motor_current < current_min)
             {
-                index_acq = 0;
-                start_acq = 0;
-                index_send_data = 0;
-                start_send_data = 1;
-            }
-        }
-        
-//        sum += current;
-//        sum -= avg;
-//        avg = sum >> 4;
-//        cnt_1sec--;
-//        
-//        if(current > avg)
-//        {
-//            //LATBbits.LATB0 = 1;
-//            cnt_speed++;
-//        }
-//        else
-//        {
-//            //LATBbits.LATB0 = 0;
-//        }
-//        if(cnt_1sec == 0)
-//        {
-//            speed = cnt_speed;
-//            cnt_speed = 0;
-//            MAIN_PRINTF_VAR("/r/n Speed is = %d", speed);
-//            MAIN_PRINTF_VAR(" Current average is = %d/r/n", avg);
-//            cnt_1sec = 20000;
-//        }
-        
-        if(speed_cnt < 80) //verify if the first loop is done
-        {
-            speed_cnt++;
-            if(current < current_min)
-            {
-                current_min = current;
+                current_min = motor_current;
             }
             
-            if(current > current_max)
+            if(motor_current > current_max)
             {
-                current_max = current;
+                current_max = motor_current;
             }            
             
-            if((current > hyst_thresh_hi) && cmp_output == 0) 
+            if((motor_current > hyst_thresh_hi) && digital_comparator_output == 0) 
             {
-                //ripple++;
-                cmp_output = 1; //reset the state of the comparator
+                digital_comparator_output = 1; //reset the state of the comparator
             }
             
-            if(current < hyst_thresh_lo && cmp_output == 1)
+            if(motor_current < hyst_thresh_lo && digital_comparator_output == 1)
             {
-                ripple++;
-                cmp_output = 0;
+                // complete pulse on comparator output
+                ripple_counter++;   // count a new current ripple
+                digital_comparator_output = 0;
             }
-            
         }
         else
         {
-            speed_cnt_2++;
+            // Update the hysteresis thresholds
+            speed_measurement_counter++;
             current_pp = current_max - current_min;
             
             hyst_thresh_hi = 32*current_pp;
@@ -513,26 +655,40 @@ void ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
             hyst_thresh_lo = hyst_thresh_lo/4;
             hyst_thresh_lo = hyst_thresh_lo + current_min;
             
-            speed_cnt = 0;           
+            hysteresis_update_counter = 0;           
             //ripple = 0;
             current_max = 0;
             current_min = 4095;
-            cmp_output = 0;
+            digital_comparator_output = 0;
         }
         
-        if(speed_cnt_2 == 25) //verify if the second loop is done
+        if(speed_measurement_counter == SPEED_MEASUREMENT_INTERVAL) //verify if the second loop is done
         {
-            speed = ripple;
-            ripple = 0;
-            speed_cnt_2 = 0;
+            // Speed Measurement Period = SPEED_MEASUREMENT_INTERVAL * HYSTERESIS_UPDATE_INTERVAL * PWM_PERIOD = 100 ms
+            // Speed measurement, save the counted ripples
+            motor_speed = ripple_counter;
+            ripple_counter = 0;
+            speed_measurement_counter = 0;
             current_pp = 4095; //reset the peak-to-peak value of the current
             new_speed_flag = 1;
         }
 
+        //////////////////// SPEED MEASUREMENT - END
         
-        //X2CScope_Update();
+
+        X2CScope_Update(); //This is the sample point of the scope at every 50us
         
-        LATBbits.LATB0 = 0;
+    #if (RUN_ON_EVAL_BOARD == 1)
+//            LATBbits.LATB0 = 0;
+    #else
+
+    #endif // RUN_ON_EVAL_BOARD
 
     }
+    LATBbits.LATB0 = 0;
+}
+
+void I2C1_Callback()
+{
+    IsSensorReadFinished = true;
 }

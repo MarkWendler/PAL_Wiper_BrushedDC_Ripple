@@ -119,16 +119,16 @@ void PWM_Initialize (void)
     PG1CLPCIH = 0x0;
     // PSS Tied to 0; PPS Not inverted; SWTERM disabled; PSYNC disabled; TERM Manual Terminate; AQPS Not inverted; AQSS None; TSYNCDIS PWM EOC; 
     PG1CLPCIL = 0x0;
-    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD SOC update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
-    PG1CONH = 0x0;
-    // DC1 1000; 
-    PG1DC = 0x3E8;
+    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD Immediate update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
+    PG1CONH = 0x100;
+    // DC1 2500; 
+    PG1DC = 0x9C4;
     // DCA1 0x0; 
     PG1DCA = 0x0;
-    // DTH1 200; 
-    PG1DTH = 0xC8;
-    // DTL1 200; 
-    PG1DTL = 0xC8;
+    // DTH1 0; 
+    PG1DTH = 0x0;
+    // DTL1 0; 
+    PG1DTL = 0x0;
     // ADTR2EN1 disabled; IEVTSEL EOC; SIEN disabled; FFIEN disabled; ADTR1OFS None; CLIEN disabled; FLTIEN disabled; ADTR2EN2 disabled; ADTR2EN3 disabled; 
     PG1EVTH = 0x0;
     // UPDTRG Duty Cycle; ADTR1PS 1:1; PGTRGSEL EOC event; ADTR1EN3 disabled; ADTR1EN1 disabled; ADTR1EN2 disabled; 
@@ -143,8 +143,8 @@ void PWM_Initialize (void)
     PG1FPCIL = 0x0;
     // PENL enabled; DTCMPSEL PCI Sync Logic; PMOD Complementary; POLL Active-high; PENH enabled; CAPSRC Software; POLH Active-high; 
     PG1IOCONH = 0xC;
-    // FLTDAT 0; DBDAT 0x0; SWAP disabled; OVRENH enabled; OVRENL enabled; OSYNC User output overrides occur when specified by UPDMOD bits; CLMOD disabled; FFDAT 0x0; CLDAT 0x0; OVRDAT 1; 
-    PG1IOCONL = 0x3600;
+    // FLTDAT 0; DBDAT 0x0; SWAP disabled; OVRENH disabled; OVRENL disabled; OSYNC User output overrides occur when specified by UPDMOD bits; CLMOD disabled; FFDAT 0x0; CLDAT 0x0; OVRDAT 0; 
+    PG1IOCONL = 0x200;
     // PWMPCI PWM1; PLR disabled; PLF disabled; PHR disabled; PHF disabled; 
     PG1LEBH = 0x0;
     // LEB 0x0; 
@@ -171,16 +171,16 @@ void PWM_Initialize (void)
     PG2CLPCIH = 0x0;
     // PSS Tied to 0; PPS Not inverted; SWTERM disabled; PSYNC disabled; TERM Manual Terminate; AQPS Not inverted; AQSS None; TSYNCDIS PWM EOC; 
     PG2CLPCIL = 0x0;
-    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD SOC update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
-    PG2CONH = 0x0;
-    // DC2 1000; 
-    PG2DC = 0x7D0;
+    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD Immediate update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
+    PG2CONH = 0x100;
+    // DC2 2500; 
+    PG2DC = 0x9C4;
     // DCA2 0x0; 
     PG2DCA = 0x0;
-    // DTH2 200; 
-    PG2DTH = 0xC8;
-    // DTL2 200; 
-    PG2DTL = 0xC8;
+    // DTH2 0; 
+    PG2DTH = 0x0;
+    // DTL2 0; 
+    PG2DTL = 0x0;
     // ADTR2EN1 disabled; IEVTSEL EOC; SIEN disabled; FFIEN disabled; ADTR1OFS None; CLIEN disabled; FLTIEN disabled; ADTR2EN2 disabled; ADTR2EN3 disabled; 
     PG2EVTH = 0x0;
     // UPDTRG Duty Cycle; ADTR1PS 1:1; PGTRGSEL EOC event; ADTR1EN3 disabled; ADTR1EN1 disabled; ADTR1EN2 disabled; 
@@ -212,8 +212,7 @@ void PWM_Initialize (void)
     // TRSET disabled; UPDREQ disabled; CLEVT disabled; TRCLR disabled; CAP disabled; SEVT disabled; FFEVT disabled; UPDATE disabled; FLTEVT disabled; 
     PG2STAT = 0x0;
     // TRIGA2 0; 
-    //PG2TRIGA = PG2DC/2;
-    PG2TRIGA = 0;
+    PG2TRIGA = 0x0;
     // TRIGB2 0; 
     PG2TRIGB = 0x0;
     // TRIGC2 0x0; 
@@ -224,8 +223,8 @@ void PWM_Initialize (void)
     PG3CLPCIH = 0x0;
     // PSS Tied to 0; PPS Not inverted; SWTERM disabled; PSYNC disabled; TERM Manual Terminate; AQPS Not inverted; AQSS None; TSYNCDIS PWM EOC; 
     PG3CLPCIL = 0x0;
-    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD SOC update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
-    PG3CONH = 0x0;
+    // MSTEN disabled; TRIGMOD Single trigger mode; SOCS Self-trigger; UPDMOD Immediate update; MPHSEL disabled; MPERSEL disabled; MDCSEL disabled; 
+    PG3CONH = 0x100;
     // DC3 2500; 
     PG3DC = 0x9C4;
     // DCA3 0x0; 
@@ -248,8 +247,8 @@ void PWM_Initialize (void)
     PG3FPCIL = 0x0;
     // PENL enabled; DTCMPSEL PCI Sync Logic; PMOD Complementary; POLL Active-high; PENH enabled; CAPSRC Software; POLH Active-high; 
     PG3IOCONH = 0xC;
-    // FLTDAT 0; DBDAT 0x0; SWAP disabled; OVRENH enabled; OVRENL enabled; OSYNC User output overrides occur when specified by UPDMOD bits; CLMOD disabled; FFDAT 0x0; CLDAT 0x0; OVRDAT 0; 
-    PG3IOCONL = 0x3200;
+    // FLTDAT 0; DBDAT 0x0; SWAP disabled; OVRENH disabled; OVRENL disabled; OSYNC User output overrides occur when specified by UPDMOD bits; CLMOD disabled; FFDAT 0x0; CLDAT 0x0; OVRDAT 0; 
+    PG3IOCONL = 0x200;
     // PWMPCI PWM1; PLR disabled; PLF disabled; PHR disabled; PHF disabled; 
     PG3LEBH = 0x0;
     // LEB 0x0; 
@@ -315,10 +314,7 @@ void PWM_Initialize (void)
     
     PWM_GeneratorEOCEventCallbackRegister(&PWM_GeneratorEOCEventCallback);
     
-    //PGxTRIGA compare event as trigger for ADC Trigger 1
-    PG2EVTLbits.ADTR1EN1 = 1;
-    //PGxTRIGB compare event as trigger source for ADC Trigger 2
-    PG2EVTHbits.ADTR2EN2 = 1;
+    
 
     PG1CONLbits.ON = 1;
     PG2CONLbits.ON = 1;

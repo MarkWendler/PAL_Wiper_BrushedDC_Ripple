@@ -8,25 +8,30 @@
                      displayName="MCC Generated Files"
                      projectFiles="true">
         <logicalFolder name="adc" displayName="adc" projectFiles="true">
-          <itemPath>mcc_generated_files/adc/adc_interface.h</itemPath>
-          <itemPath>mcc_generated_files/adc/adc1.h</itemPath>
           <itemPath>mcc_generated_files/adc/adc_types.h</itemPath>
+          <itemPath>mcc_generated_files/adc/adc_interface.h</itemPath>
           <itemPath>mcc_generated_files/adc/adc_features.h</itemPath>
+          <itemPath>mcc_generated_files/adc/adc1.h</itemPath>
         </logicalFolder>
         <logicalFolder name="cmp" displayName="cmp" projectFiles="true">
-          <itemPath>mcc_generated_files/cmp/cmp_interface.h</itemPath>
           <itemPath>mcc_generated_files/cmp/cmp1.h</itemPath>
+          <itemPath>mcc_generated_files/cmp/cmp_interface.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="i2c_host" displayName="i2c_host" projectFiles="true">
+          <itemPath>mcc_generated_files/i2c_host/i2c_host_interface.h</itemPath>
+          <itemPath>mcc_generated_files/i2c_host/i2c_host_types.h</itemPath>
+          <itemPath>mcc_generated_files/i2c_host/i2c1.h</itemPath>
         </logicalFolder>
         <logicalFolder name="mcp802x" displayName="mcp802x" projectFiles="true">
           <itemPath>mcc_generated_files/mcp802x/MCP802X_task.h</itemPath>
           <itemPath>mcc_generated_files/mcp802x/mcp8021.h</itemPath>
         </logicalFolder>
         <logicalFolder name="opa" displayName="opa" projectFiles="true">
-          <itemPath>mcc_generated_files/opa/opa3.h</itemPath>
           <itemPath>mcc_generated_files/opa/opa1.h</itemPath>
+          <itemPath>mcc_generated_files/opa/opa3.h</itemPath>
           <itemPath>mcc_generated_files/opa/opa_interface.h</itemPath>
-          <itemPath>mcc_generated_files/opa/opa2.h</itemPath>
           <itemPath>mcc_generated_files/opa/opa_types.h</itemPath>
+          <itemPath>mcc_generated_files/opa/opa2.h</itemPath>
         </logicalFolder>
         <logicalFolder name="pwm_hs" displayName="pwm_hs" projectFiles="true">
           <itemPath>mcc_generated_files/pwm_hs/pwm.h</itemPath>
@@ -35,35 +40,34 @@
           <itemPath>mcc_generated_files/pwm_hs/pwm_features.h</itemPath>
         </logicalFolder>
         <logicalFolder name="system" displayName="system" projectFiles="true">
-          <itemPath>mcc_generated_files/system/pins.h</itemPath>
-          <itemPath>mcc_generated_files/system/system.h</itemPath>
-          <itemPath>mcc_generated_files/system/system_types.h</itemPath>
-          <itemPath>mcc_generated_files/system/watchdog.h</itemPath>
-          <itemPath>mcc_generated_files/system/interrupt.h</itemPath>
-          <itemPath>mcc_generated_files/system/clock.h</itemPath>
-          <itemPath>mcc_generated_files/system/traps.h</itemPath>
-          <itemPath>mcc_generated_files/system/reset.h</itemPath>
-          <itemPath>mcc_generated_files/system/interrupt_types.h</itemPath>
-          <itemPath>mcc_generated_files/system/dmt.h</itemPath>
           <itemPath>mcc_generated_files/system/reset_types.h</itemPath>
+          <itemPath>mcc_generated_files/system/reset.h</itemPath>
+          <itemPath>mcc_generated_files/system/clock.h</itemPath>
+          <itemPath>mcc_generated_files/system/dmt.h</itemPath>
+          <itemPath>mcc_generated_files/system/system_types.h</itemPath>
+          <itemPath>mcc_generated_files/system/system.h</itemPath>
+          <itemPath>mcc_generated_files/system/interrupt.h</itemPath>
+          <itemPath>mcc_generated_files/system/traps.h</itemPath>
+          <itemPath>mcc_generated_files/system/watchdog.h</itemPath>
+          <itemPath>mcc_generated_files/system/pins.h</itemPath>
+          <itemPath>mcc_generated_files/system/interrupt_types.h</itemPath>
         </logicalFolder>
         <logicalFolder name="timer" displayName="timer" projectFiles="true">
-          <itemPath>mcc_generated_files/timer/tmr1.h</itemPath>
           <itemPath>mcc_generated_files/timer/timer_interface.h</itemPath>
-          <itemPath>mcc_generated_files/timer/sccp1.h</itemPath>
+          <itemPath>mcc_generated_files/timer/tmr1.h</itemPath>
         </logicalFolder>
         <logicalFolder name="uart" displayName="uart" projectFiles="true">
           <itemPath>mcc_generated_files/uart/uart1.h</itemPath>
-          <itemPath>mcc_generated_files/uart/uart_types.h</itemPath>
-          <itemPath>mcc_generated_files/uart/uart_interface.h</itemPath>
           <itemPath>mcc_generated_files/uart/uart2.h</itemPath>
-        </logicalFolder>
-        <logicalFolder name="X2Cscope" displayName="X2Cscope" projectFiles="true">
-          <itemPath>mcc_generated_files/X2Cscope/X2Cscope.h</itemPath>
-          <itemPath>mcc_generated_files/X2Cscope/X2CscopeComm.h</itemPath>
+          <itemPath>mcc_generated_files/uart/uart_interface.h</itemPath>
+          <itemPath>mcc_generated_files/uart/uart_types.h</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <itemPath>uart_debug.h</itemPath>
+      <logicalFolder name="f1" displayName="X2CScope" projectFiles="true">
+        <itemPath>X2Cscope/X2Cscope.h</itemPath>
+        <itemPath>X2Cscope/X2CscopeComm.h</itemPath>
+      </logicalFolder>
+      <itemPath>UART_debug.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -85,17 +89,22 @@
             <itemPath>mcc_generated_files/cmp/src/cmp1.c</itemPath>
           </logicalFolder>
         </logicalFolder>
+        <logicalFolder name="i2c_host" displayName="i2c_host" projectFiles="true">
+          <logicalFolder name="src" displayName="src" projectFiles="true">
+            <itemPath>mcc_generated_files/i2c_host/src/i2c1.c</itemPath>
+          </logicalFolder>
+        </logicalFolder>
         <logicalFolder name="mcp802x" displayName="mcp802x" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>mcc_generated_files/mcp802x/src/MCP802X_task.c</itemPath>
             <itemPath>mcc_generated_files/mcp802x/src/mcp8021.c</itemPath>
+            <itemPath>mcc_generated_files/mcp802x/src/MCP802X_task.c</itemPath>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="opa" displayName="opa" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>mcc_generated_files/opa/src/opa2.c</itemPath>
             <itemPath>mcc_generated_files/opa/src/opa1.c</itemPath>
             <itemPath>mcc_generated_files/opa/src/opa3.c</itemPath>
+            <itemPath>mcc_generated_files/opa/src/opa2.c</itemPath>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="pwm_hs" displayName="pwm_hs" projectFiles="true">
@@ -105,33 +114,32 @@
         </logicalFolder>
         <logicalFolder name="system" displayName="system" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>mcc_generated_files/system/src/system.c</itemPath>
-            <itemPath>mcc_generated_files/system/src/config_bits.c</itemPath>
             <itemPath>mcc_generated_files/system/src/pins.c</itemPath>
+            <itemPath>mcc_generated_files/system/src/traps.c</itemPath>
+            <itemPath>mcc_generated_files/system/src/dmt_asm.s</itemPath>
+            <itemPath>mcc_generated_files/system/src/system.c</itemPath>
+            <itemPath>mcc_generated_files/system/src/clock.c</itemPath>
+            <itemPath>mcc_generated_files/system/src/config_bits.c</itemPath>
             <itemPath>mcc_generated_files/system/src/interrupt.c</itemPath>
             <itemPath>mcc_generated_files/system/src/dmt.c</itemPath>
-            <itemPath>mcc_generated_files/system/src/traps.c</itemPath>
             <itemPath>mcc_generated_files/system/src/reset.c</itemPath>
-            <itemPath>mcc_generated_files/system/src/clock.c</itemPath>
-            <itemPath>mcc_generated_files/system/src/dmt_asm.s</itemPath>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="timer" displayName="timer" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
             <itemPath>mcc_generated_files/timer/src/tmr1.c</itemPath>
-            <itemPath>mcc_generated_files/timer/src/sccp1.c</itemPath>
           </logicalFolder>
         </logicalFolder>
         <logicalFolder name="uart" displayName="uart" projectFiles="true">
           <logicalFolder name="src" displayName="src" projectFiles="true">
-            <itemPath>mcc_generated_files/uart/src/uart1.c</itemPath>
             <itemPath>mcc_generated_files/uart/src/uart2.c</itemPath>
+            <itemPath>mcc_generated_files/uart/src/uart1.c</itemPath>
           </logicalFolder>
         </logicalFolder>
-        <logicalFolder name="X2Cscope" displayName="X2Cscope" projectFiles="true">
-          <itemPath>mcc_generated_files/X2Cscope/X2Cscope.c</itemPath>
-          <itemPath>mcc_generated_files/X2Cscope/X2CscopeComm.c</itemPath>
-        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="f1" displayName="X2CScope" projectFiles="true">
+        <itemPath>X2Cscope/X2Cscope.c</itemPath>
+        <itemPath>X2Cscope/X2CscopeComm.c</itemPath>
       </logicalFolder>
       <itemPath>main.c</itemPath>
     </logicalFolder>
@@ -139,9 +147,13 @@
                    displayName="Important Files"
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
-      <itemPath>Wiper_DC_project_v1.mc3</itemPath>
+      <itemPath>BrushedDC_RippleCount_Wiper.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../Wiper_DC_project_v1.X</Elem>
+    <Elem>X2Cscope</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="default" type="2">
@@ -150,9 +162,9 @@
         <targetDevice>dsPIC33CDVL64MC106</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>pk4hybrid</platformTool>
+        <platformTool>ICD4Tool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>2.00</languageToolchainVersion>
+        <languageToolchainVersion>1.70</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
       <packs>
@@ -163,8 +175,7 @@
       <compileType>
         <linkerTool>
           <linkerLibItems>
-            <linkerLibFileItem>../dspic33cdvl_melody_test.X/mcc_generated_files/motorBench/library/x2cscope/libx2cscope-dspic-elf.a</linkerLibFileItem>
-            <linkerLibFileItem>../../sip-mc-development-board-an1292-dspic33cdvl64mc106/library/library-x2cscope/libx2cscope-generic-dspic-elf.a</linkerLibFileItem>
+            <linkerLibFileItem>X2Cscope/libx2cscope-33cd_mc-elf.a</linkerLibFileItem>
           </linkerLibItems>
         </linkerTool>
         <archiverTool>
@@ -373,7 +384,7 @@
         <property key="memories.programmemory.ranges" value="0-aeff"/>
         <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoFilePath"
-                  value="C:/Users/M67904/Desktop/Wiper motor project/Wiper_DC_project_v1.X/debug/default/Wiper_DC_project_v1_ptg"/>
+                  value="C:/_projects/dspic33cdvl_basic_demo.X/debug/default/dspic33cdvl_basic_demo_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.ledbrightness" value="5"/>
@@ -436,7 +447,6 @@
                   value="ToolFirmwareOption.UseLatest"/>
         <property key="ToolFirmwareToolPack"
                   value="Press to select which tool pack to use"/>
-        <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value=""/>
         <property key="communication.interface.jtag" value="2wire"/>
         <property key="communication.speed" value="${communication.speed.default}"/>
@@ -444,8 +454,11 @@
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.simultaneous.debug" value="false"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
         <property key="freeze.timers" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -461,8 +474,7 @@
         <property key="memories.programmemory.ranges" value="0-aeff"/>
         <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoFilePath"
-                  value="C:/Users/M67904/Desktop/Wiper motor project/Wiper_DC_project_v1.X/debug/default/Wiper_DC_project_v1_ptg"/>
-        <property key="programmerToGoImageName" value="Wiper_DC_project_v1_ptg"/>
+                  value="C:/_projects/dspic33cdvl_basic_demo.X/debug/default/dspic33cdvl_basic_demo_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
         <property key="programoptions.ledbrightness" value="5"/>
@@ -484,15 +496,13 @@
         <property key="programoptions.programcalmem" value="false"/>
         <property key="programoptions.programuserotp" value="false"/>
         <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
-        <property key="ptgProgramImage" value="true"/>
-        <property key="ptgSendImage" value="true"/>
         <property key="toolpack.updateoptions"
                   value="toolpack.updateoptions.uselatestoolpack"/>
         <property key="toolpack.updateoptions.packversion"
                   value="Press to select which tool pack to use"/>
         <property key="voltagevalue" value="3.25"/>
       </Tool>
-      <pk4hybrid>
+      <pkob4hybrid>
         <property key="ADC" value="true"/>
         <property key="AutoSelectMemRanges" value="auto"/>
         <property key="CLC 1" value="true"/>
@@ -519,7 +529,6 @@
         <property key="SENT1" value="true"/>
         <property key="SPI 1" value="true"/>
         <property key="SPI 2" value="true"/>
-        <property key="SecureSegment.SegmentProgramming" value="FullChipProgramming"/>
         <property key="TIMER1" value="true"/>
         <property key="ToolFirmwareFilePath"
                   value="Press to browse for a specific firmware version"/>
@@ -527,7 +536,6 @@
                   value="ToolFirmwareOption.UseLatest"/>
         <property key="ToolFirmwareToolPack"
                   value="Press to select which tool pack to use"/>
-        <property key="communication.activationmode" value="nohv"/>
         <property key="communication.interface" value=""/>
         <property key="communication.interface.jtag" value="2wire"/>
         <property key="communication.speed" value="${communication.speed.default}"/>
@@ -535,7 +543,10 @@
         <property key="debugoptions.reset-behaviour" value="Use system settings"/>
         <property key="debugoptions.simultaneous.debug" value="false"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="event.recorder.enabled" value="false"/>
+        <property key="event.recorder.scvd.files" value=""/>
         <property key="freeze.timers" value="false"/>
+        <property key="lastid" value=""/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>
         <property key="memories.configurationmemory" value="true"/>
@@ -549,17 +560,10 @@
                   value="${memories.instruction.ram.ranges}"/>
         <property key="memories.programmemory" value="true"/>
         <property key="memories.programmemory.ranges" value="0-aeff"/>
-        <property key="poweroptions.powerenable" value="false"/>
         <property key="programmerToGoFilePath"
-                  value="C:/Users/M67904/Desktop/Wiper motor project/Wiper_DC_project_v1.X/debug/default/Wiper_DC_project_v1_ptg"/>
-        <property key="programmerToGoImageName" value="Wiper_DC_project_v1_ptg"/>
+                  value="C:/_projects/dspic33cdvl_basic_demo.X/debug/default/dspic33cdvl_basic_demo_ptg"/>
         <property key="programoptions.donoteraseauxmem" value="false"/>
         <property key="programoptions.eraseb4program" value="true"/>
-        <property key="programoptions.ledbrightness" value="5"/>
-        <property key="programoptions.pgcconfig" value="pull down"/>
-        <property key="programoptions.pgcresistor.value" value="4.7"/>
-        <property key="programoptions.pgdconfig" value="pull down"/>
-        <property key="programoptions.pgdresistor.value" value="4.7"/>
         <property key="programoptions.pgmentry.voltage" value="low"/>
         <property key="programoptions.pgmspeed" value="Med"/>
         <property key="programoptions.preservedataflash" value="false"/>
@@ -574,14 +578,11 @@
         <property key="programoptions.programcalmem" value="false"/>
         <property key="programoptions.programuserotp" value="false"/>
         <property key="programoptions.testmodeentrymethod" value="VDDFirst"/>
-        <property key="ptgProgramImage" value="true"/>
-        <property key="ptgSendImage" value="true"/>
         <property key="toolpack.updateoptions"
                   value="toolpack.updateoptions.uselatestoolpack"/>
         <property key="toolpack.updateoptions.packversion"
                   value="Press to select which tool pack to use"/>
-        <property key="voltagevalue" value="3.25"/>
-      </pk4hybrid>
+      </pkob4hybrid>
     </conf>
   </confs>
 </configurationDescriptor>
