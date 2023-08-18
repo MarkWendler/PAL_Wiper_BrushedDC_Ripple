@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver header file for the CMP1 driver
  *            
- * @version   Firmware Driver Version 1.2.0
+ * @skipline @version   Firmware Driver Version 1.2.1
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.1
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -119,6 +119,7 @@ extern const struct CMP_INTERFACE CMP_DAC1;
 /**
  * @ingroup  cmpdriver
  * @brief    Initialize the CMP1 module
+ * @param    none
  * @return   none  
  */
 
@@ -127,6 +128,7 @@ void CMP1_Initialize(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Deinitializes the CMP1 to POR values
+ * @param    none
  * @return   none  
  */
 void CMP1_Deinitialize(void);
@@ -134,6 +136,7 @@ void CMP1_Deinitialize(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Returns the comparator output status 
+ * @param    none
  * @return   true   - Comparator output is high
  * @return   false  - Comparator output is low
  */
@@ -142,6 +145,7 @@ bool CMP1_StatusGet(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Enables the common DAC module
+ * @param    none
  * @return   none 
  */
 void CMP1_Enable(void);
@@ -149,6 +153,7 @@ void CMP1_Enable(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Disables the common DAC module
+ * @param    none
  * @return   none  
  */
 void CMP1_Disable(void);
@@ -156,6 +161,7 @@ void CMP1_Disable(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Enables the individual DAC module
+ * @param    none
  * @return   none 
  */
 void CMP1_DACEnable(void);
@@ -163,6 +169,7 @@ void CMP1_DACEnable(void);
 /**
  * @ingroup  cmpdriver
  * @brief    Disables the individual DAC module
+ * @param    none
  * @return   none
  */
 void CMP1_DACDisable(void);
@@ -190,6 +197,7 @@ void CMP1_EventCallbackRegister(void (*handler)(void));
  *           The user can override and implement the default callback without 
  *           weak attribute or can register a custom callback function using  
  *           CMP1_EventCallbackRegister.
+ * @param    none
  * @return   none  
  */
 void CMP1_EventCallback(void);
@@ -199,6 +207,7 @@ void CMP1_EventCallback(void);
  * @brief    The Task function can be called in the main application using the High Speed
  *           Comparator, when interrupts are not used.  This would thus introduce the 
  *           polling mode feature of the Analog Comparator.
+ * @param    none
  * @return   none  
  */
 void CMP1_Tasks(void);

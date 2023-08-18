@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver source file for OPA3 driver
  *
- * @version   Firmware Driver Version 1.2.1
+ * @skipline @version   Firmware Driver Version 1.2.2
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

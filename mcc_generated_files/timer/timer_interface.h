@@ -8,7 +8,7 @@
  * @brief     Timer Driver is a 16-bit timer or 32-bit timer that can operate as a 
  *            free-running interval timer using dsPIC MCUs.
  *
- * @version   Firmware Driver Version 1.5.0
+ * @skipline @version   Firmware Driver Version 1.5.1
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

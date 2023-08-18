@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the OPA2 driver
  *
- * @version   Firmware Driver Version 1.2.1
+ * @skipline @version   Firmware Driver Version 1.2.2
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -63,6 +63,7 @@ extern const struct OPA_INTERFACE OPA2;
 /**
  * @ingroup  opadriver
  * @brief    Initializes the OPA2 module
+ * @param    none
  * @return   none  
  */
 void OPA2_Initialize (void);
@@ -70,6 +71,7 @@ void OPA2_Initialize (void);
 /**
  * @ingroup  opadriver
  * @brief    Deinitializes the OPA2 to POR values
+ * @param    none
  * @return   none  
  */
 void OPA2_Deinitialize(void);
@@ -79,6 +81,7 @@ void OPA2_Deinitialize(void);
  * @brief    This inline function enables the OPA2 module
  * @pre      The OPA2_Initialize function should be called for the specified 
  *           OPA2 driver instance
+ * @param    none
  * @return   none  
  */
 inline static void OPA2_Enable( void )
@@ -89,6 +92,7 @@ inline static void OPA2_Enable( void )
 /**
  * @ingroup  opadriver
  * @brief    This inline function disables the OPA2 module
+ * @param    none
  * @return   none  
  */
 inline static void OPA2_Disable( void )

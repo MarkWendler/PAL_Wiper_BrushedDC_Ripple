@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the PWM driver
  *
- * @version   Firmware Driver Version 1.1.5
+ * @skipline @version   Firmware Driver Version 1.1.6
  *
- * @version   PLIB Version 2.2.0
+ * @skipline @version   PLIB Version 2.3.1
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -279,6 +279,7 @@ extern const struct PWM_HS_INTERFACE PWM_HS;
 /**
  * @ingroup  pwmhsdriver
  * @brief    Initializes PWM module, using the given initialization data
+ * @param    none
  * @return   none  
  */
 void PWM_Initialize(void);
@@ -286,6 +287,7 @@ void PWM_Initialize(void);
 /**
  * @ingroup  pwmhsdriver
  * @brief    Deinitializes the PWM to POR values
+ * @param    none
  * @return   none  
  */
 void PWM_Deinitialize(void);
@@ -387,6 +389,7 @@ inline static void PWM_ModeSet(enum PWM_GENERATOR genNum, enum PWM_MODES mode)
 /**
  * @ingroup  pwmhsdriver
  * @brief    This inline function will enable all the generators of PWM module
+ * @param    none
  * @return   none  
  */
 inline static void PWM_Enable(void)
@@ -399,6 +402,7 @@ inline static void PWM_Enable(void)
 /**
  * @ingroup  pwmhsdriver
  * @brief    This inline function will disable all the generators of PWM module
+ * @param    none
  * @return   none  
  */
 inline static void PWM_Disable(void)

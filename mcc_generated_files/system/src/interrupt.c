@@ -7,7 +7,9 @@
  *            
  * @brief     This is the generated driver source file for INTERRUPT driver
  *            
- * @version   Driver Version 1.1.0
+ * @skipline @version   Firmware Driver Version 1.1.2
+ *
+ * @skipline @version   PLIB Version 1.3.1
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -58,40 +60,40 @@ void INTERRUPT_Initialize(void)
     IPC23bits.ADCAN2IP = 1;
     
     // DMT: Dead Man Timer
-    // Priority: 1
-    IPC11bits.DMTIP = 1;
+    // Priority: 4
+    IPC11bits.DMTIP = 4;
     
     // I2C1BC: I2C1 Bus Collision
-    // Priority: 1
-    IPC16bits.I2C1BCIP = 1;
+    // Priority: 4
+    IPC16bits.I2C1BCIP = 4;
     
     // MI2C1: I2C1 Master Event
-    // Priority: 1
-    IPC4bits.MI2C1IP = 1;
+    // Priority: 4
+    IPC4bits.MI2C1IP = 4;
     
     // CND: Change Notification D
-    // Priority: 1
-    IPC18bits.CNDIP = 1;
+    // Priority: 3
+    IPC18bits.CNDIP = 3;
     
     // T1: Timer 1
-    // Priority: 1
-    IPC0bits.T1IP = 1;
+    // Priority: 3
+    IPC0bits.T1IP = 3;
     
     // U2EVT: UART2 Event
-    // Priority: 1
-    IPC47bits.U2EVTIP = 1;
+    // Priority: 2
+    IPC47bits.U2EVTIP = 2;
     
     // U2E: UART2 Error
-    // Priority: 1
-    IPC12bits.U2EIP = 1;
+    // Priority: 2
+    IPC12bits.U2EIP = 2;
     
     // U2TX: UART2 TX
-    // Priority: 1
-    IPC7bits.U2TXIP = 1;
+    // Priority: 2
+    IPC7bits.U2TXIP = 2;
     
     // U2RX: UART2 RX
-    // Priority: 1
-    IPC6bits.U2RXIP = 1;
+    // Priority: 2
+    IPC6bits.U2RXIP = 2;
     
 }
 

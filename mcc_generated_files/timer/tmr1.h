@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the TMR1 driver
  *
- * @version   Firmware Driver Version 1.5.0
+ * @skipline @version   Firmware Driver Version 1.5.1
  *
- * @version   PLIB Version 1.4.0
+ * @skipline @version   PLIB Version 1.5.2
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -121,6 +121,7 @@ extern const struct TIMER_INTERFACE Timer1;
 /**
  * @ingroup  timerdriver
  * @brief    Initializes the TMR1 module
+ * @param    none
  * @return   none
  */
 void TMR1_Initialize ( void );
@@ -128,6 +129,7 @@ void TMR1_Initialize ( void );
 /**
  * @ingroup  timerdriver
  * @brief    Deinitializes the TMR1 to POR values
+ * @param    none
  * @return   none
  */
 void TMR1_Deinitialize(void);
@@ -137,6 +139,7 @@ void TMR1_Deinitialize(void);
  * @ingroup  timerdriver
  * @brief    Starts the timer
  * @pre      \ref TMR1_Initialize must be called
+ * @param    none
  * @return   none
  */
 void TMR1_Start( void );
@@ -145,6 +148,7 @@ void TMR1_Start( void );
  * @ingroup  timerdriver
  * @brief    Stops the timer
  * @pre      \ref TMR1_Initialize must be called
+ * @param    none
  * @return   none
  */
 void TMR1_Stop( void );
@@ -160,6 +164,7 @@ void TMR1_PeriodSet( uint32_t count );
 /**
  * @ingroup    timerdriver
  * @brief      This inline function gets the TMR1 period count value
+ * @param      none
  * @return     Number of clock counts
  */
 inline static uint32_t TMR1_PeriodGet( void )
@@ -170,6 +175,7 @@ inline static uint32_t TMR1_PeriodGet( void )
 /**
  * @ingroup    timerdriver
  * @brief      This inline function gets the TMR1 elapsed time value
+ * @param      none
  * @return     Elapsed count value of the timer
  */
 inline static uint32_t TMR1_CounterGet( void )
@@ -180,6 +186,7 @@ inline static uint32_t TMR1_CounterGet( void )
 /**
  * @ingroup    timerdriver
  * @brief      This inline function gets the 16 bit TMR1 elapsed time value
+ * @param      none
  * @return     16 bit elapsed count value of the timer
  */
 inline static uint16_t TMR1_Counter16BitGet( void )
@@ -209,6 +216,7 @@ void TMR1_TimeoutCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using  \ref TMR1_TimeoutCallbackRegister.
+ * @param    none
  * @return   none  
  */
 void TMR1_TimeoutCallback(void);

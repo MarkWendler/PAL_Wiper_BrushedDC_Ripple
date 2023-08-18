@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver source file for PINS driver.
  *
- * @version   Firmware Driver Version 1.0.1
+ * @skipline @version   Firmware Driver Version 1.0.2
  *
- * @version   PLIB Version 1.1.0
+ * @skipline @version   PLIB Version 1.3.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -57,7 +57,7 @@ void PINS_Initialize(void)
     /****************************************************************************
      * Setting the GPIO Direction SFR(s)
      ***************************************************************************/
-    TRISA = 0x000F;
+    TRISA = 0x0007;
     TRISB = 0x03FE;
     TRISC = 0x0F7F;
     TRISD = 0x2502;

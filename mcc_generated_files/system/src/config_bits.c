@@ -9,7 +9,7 @@
  *
  * @version   Firmware Driver Version 1.0.1
  *
- * @version   PLIB Version 1.2.0
+ * @version   PLIB Version 1.2.1
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

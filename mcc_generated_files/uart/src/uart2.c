@@ -7,9 +7,9 @@
  *  
  * @brief       This is the generated driver source file for the UART2 driver
  *            
- * @version     Firmware Driver Version 1.5.0
+ * @skipline @version     Firmware Driver Version 1.6.1
  *
- * @version     PLIB Version 1.4.0
+ * @skipline @version     PLIB Version 1.4.1
  *
  * @skipline    Device : dsPIC33CDVL64MC106
 */
@@ -557,13 +557,13 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2EInterrupt(void)
 {
     if (U2STAbits.ABDOVF == 1)
     {
-        uartError.autoBaudOverflow = uartError.status|UART_ERROR_AUTOBAUD_OVERFLOW_MASK;
+        uartError.status = uartError.status|UART_ERROR_AUTOBAUD_OVERFLOW_MASK;
         U2STAbits.ABDOVF = 0;
     }
     
     if (U2STAbits.TXCIF == 1)
     {
-        uartError.txCollisionError = uartError.status|UART_ERROR_TX_COLLISION_MASK;
+        uartError.status = uartError.status|UART_ERROR_TX_COLLISION_MASK;
         if(NULL != UART2_TxCollisionHandler)
         {
             (*UART2_TxCollisionHandler)();
@@ -574,7 +574,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2EInterrupt(void)
     
     if (U2STAbits.OERR == 1)
     {
-        uartError.overrunError = uartError.status|UART_ERROR_RX_OVERRUN_MASK;
+        uartError.status = uartError.status|UART_ERROR_RX_OVERRUN_MASK;
         if(NULL != UART2_OverrunErrorHandler)
         {
             (*UART2_OverrunErrorHandler)();
@@ -585,7 +585,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2EInterrupt(void)
     
     if (U2STAbits.PERR == 1)
     {
-        uartError.parityError = uartError.status|UART_ERROR_PARITY_MASK;
+        uartError.status = uartError.status|UART_ERROR_PARITY_MASK;
         if(NULL != UART2_ParityErrorHandler)
         {
             (*UART2_ParityErrorHandler)();
@@ -594,7 +594,7 @@ void __attribute__ ( ( interrupt, no_auto_psv ) ) _U2EInterrupt(void)
     
     if (U2STAbits.FERR == 1)
     {
-        uartError.frammingError = uartError.status|UART_ERROR_FRAMING_MASK;
+        uartError.status = uartError.status|UART_ERROR_FRAMING_MASK;
         if(NULL != UART2_FramingErrorHandler)
         {
             (*UART2_FramingErrorHandler)();

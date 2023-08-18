@@ -6,9 +6,11 @@
  * @ingroup   resetdriver
  *            
  * @brief     This is the generated driver source file for RESET driver
- *            
- * @version   Driver Version 1.0.0
- *            
+ *
+ * @skipline @version   Firmware Driver Version 1.0.3
+ *
+ * @skipline @version   PLIB Version 1.1.0
+ *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
 
@@ -193,7 +195,7 @@ void __attribute__ ((weak)) RESET_CauseHandler(void)
     }
 }
 
-void RESET_CauseClearAll()
+void RESET_CauseClearAll(void)
 { 
     RCON = 0x00; 
 }

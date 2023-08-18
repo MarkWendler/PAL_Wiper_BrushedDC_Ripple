@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver types header file for the ADC driver
  *            
- * @version   Firmware Driver Version 1.4.3
+ * @skipline @version   Firmware Driver Version 1.4.4
  *
- * @version   PLIB Version 2.3.0
+ * @skipline @version   PLIB Version 2.4.2
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */

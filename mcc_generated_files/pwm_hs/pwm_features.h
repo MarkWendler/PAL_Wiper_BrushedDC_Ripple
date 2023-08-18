@@ -13,9 +13,9 @@
  * 
  *            The content in this file is strictly "read only" and should not be altered
  *
- * @version   Firmware Driver Version 1.1.5
+ * @skipline @version   Firmware Driver Version 1.1.6
  *
- * @version   PLIB Version 2.2.0
+ * @skipline @version   PLIB Version 2.3.1
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

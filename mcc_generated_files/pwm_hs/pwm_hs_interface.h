@@ -8,9 +8,9 @@
  * @brief     High-Resolution Pulse-Width Modulated (PWM) with Fine Edge 
  *            Placement using dsPIC MCUs. 
  *
- * @version   Firmware Driver Version 1.1.5
+ * @skipline @version   Firmware Driver Version 1.1.6
  *
- * @version   PLIB Version 2.2.0
+ * @skipline @version   PLIB Version 2.3.1
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

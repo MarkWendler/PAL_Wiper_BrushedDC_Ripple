@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the OPA3 driver
  *
- * @version   Firmware Driver Version 1.2.1
+ * @skipline @version   Firmware Driver Version 1.2.2
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -63,6 +63,7 @@ extern const struct OPA_INTERFACE OPA3;
 /**
  * @ingroup  opadriver
  * @brief    Initializes OPA3 module
+ * @param    none
  * @return   none  
  */
 void OPA3_Initialize (void);
@@ -70,6 +71,7 @@ void OPA3_Initialize (void);
 /**
  * @ingroup  opadriver
  * @brief    Deinitializes the OPA3 to POR values
+ * @param    none
  * @return   none  
  */
 void OPA3_Deinitialize(void);
@@ -79,6 +81,7 @@ void OPA3_Deinitialize(void);
  * @brief    This inline function enables the OPA3 module
  * @pre      The OPA3_Initialize function should be called for the specified 
  *           OPA3 driver instance.
+ * @param    none
  * @return   none  
  */
 inline static void OPA3_Enable( void )
@@ -89,6 +92,7 @@ inline static void OPA3_Enable( void )
 /**
  * @ingroup  opadriver
  * @brief    This inline function disables the OPA3 module
+ * @param    none
  * @return   none  
  */
 inline static void OPA3_Disable( void )

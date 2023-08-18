@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the OPA1 driver
  *
- * @version   Firmware Driver Version 1.2.1
+ * @skipline @version   Firmware Driver Version 1.2.2
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -62,6 +62,7 @@
 /**
  * @ingroup  opadriver
  * @brief    Initializes the OPA1 module
+ * @param    none
  * @return   none  
  */
 void OPA1_Initialize (void);
@@ -69,6 +70,7 @@ void OPA1_Initialize (void);
 /**
  * @ingroup  opadriver
  * @brief    Deinitializes the OPA1 to POR values
+ * @param    none
  * @return   none  
  */
 void OPA1_Deinitialize(void);
@@ -78,6 +80,7 @@ void OPA1_Deinitialize(void);
  * @brief    This inline function enables the OPA1 module
  * @pre      The OPA1_Initialize function should be called for the specified 
  *           OPA1 driver instance.
+ * @param    none
  * @return   none  
  */
 inline static void OPA1_Enable( void )
@@ -88,6 +91,7 @@ inline static void OPA1_Enable( void )
 /**
  * @ingroup  opadriver
  * @brief    This inline function disables the OPA1 module
+ * @param    none
  * @return   none  
  */
 inline static void OPA1_Disable( void )

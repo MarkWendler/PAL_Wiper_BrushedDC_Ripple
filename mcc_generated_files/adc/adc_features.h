@@ -11,9 +11,9 @@
  *            the user application to other device which might have varied feature list. 
  *            The content in this file is strictly "read only" and should not be altered.
  *            
- * @version   Firmware Driver Version 1.4.3
+ * @skipline @version   Firmware Driver Version 1.4.4
  *
- * @version   PLIB Version 2.3.0
+ * @skipline @version   PLIB Version 2.4.2
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */

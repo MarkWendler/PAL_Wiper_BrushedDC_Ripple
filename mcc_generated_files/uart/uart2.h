@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver header file for the UART2 driver
  *            
- * @version   Firmware Driver Version 1.5.0
+ * @skipline @version   Firmware Driver Version 1.6.1
  *
- * @version   PLIB Version 1.4.0
+ * @skipline @version   PLIB Version 1.4.1
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -202,6 +202,7 @@ extern const struct UART_INTERFACE UART2_Drv;
 /**
  * @ingroup  uartdriver
  * @brief    Initializes the UART driver
+ * @param    none
  * @return   none
  */
 void UART2_Initialize(void);
@@ -209,6 +210,7 @@ void UART2_Initialize(void);
 /**
  * @ingroup  uartdriver
  * @brief    Deinitializes the UART to POR values
+ * @param    none
  * @return   none
  */
 void UART2_Deinitialize(void);
@@ -219,6 +221,7 @@ void UART2_Deinitialize(void);
  * @pre      Check receive status using \ref UART2_IsRxReady function
  *           before calling this function or call this function within the 
  *           \ref UART2_RxCompleteCallback. 
+ * @param    none
  * @return   A data byte received by the driver.
  */
 uint8_t UART2_Read(void);
@@ -237,6 +240,7 @@ void UART2_Write(uint8_t data);
 /**
  * @ingroup  uartdriver
  * @brief    Returns a boolean value if data is available to read
+ * @param    none
  * @return   true  - Data available to read
  * @return   false - Data not available to read
  */
@@ -245,6 +249,7 @@ bool UART2_IsRxReady(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns a boolean value if data can be written
+ * @param    none
  * @return   true    - Data can be written
  * @return   false   - Data can not be written
  */
@@ -253,6 +258,7 @@ bool UART2_IsTxReady(void);
 /**
  * @ingroup  uartdriver
  * @brief    Indicates if all bytes have been transferred
+ * @param    none
  * @return   true    - All bytes transferred
  * @return   false   - Data transfer is pending
  */
@@ -261,6 +267,7 @@ bool UART2_IsTxDone(void);
 /**
  * @ingroup  uartdriver
  * @brief    Enables UART2 transmit 
+ * @param    none
  * @return   none
  */
 void UART2_TransmitEnable(void);
@@ -268,6 +275,7 @@ void UART2_TransmitEnable(void);
 /**
  * @ingroup  uartdriver
  * @brief    Disables UART2 transmit 
+ * @param    none
  * @return   none
  */
 void UART2_TransmitDisable(void);
@@ -284,6 +292,7 @@ void UART2_AutoBaudSet(bool enable);
 /**
  * @ingroup  uartdriver
  * @brief    Returns the status of Auto-Baud detection
+ * @param    none
  * @return   true    - Auto-Baud detection in progress or counter overflow occurred
  * @return   false   - Auto-Baud detection is complete or disabled
  */
@@ -292,6 +301,7 @@ bool UART2_AutoBaudQuery(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns enable state of the Auto-Baud feature
+ * @param    none
  * @return   true    - Auto-Baud is enabled
  * @return   false   - Auto-Baud is disabled
  */
@@ -309,6 +319,7 @@ void UART2_BRGCountSet(uint32_t brgValue);
 /**
  * @ingroup  uartdriver
  * @brief    Gets the BRG value of UART2
+ * @param    none
  * @return   Combined BRG value upto 20 bits
  */
 uint32_t UART2_BRGCountGet(void);
@@ -325,6 +336,7 @@ void UART2_BaudRateSet(uint32_t baudRate);
 /**
  * @ingroup  uartdriver
  * @brief    Gets the actual Baud-Rate of UART2
+ * @param    none
  * @return   Actual baud-rate of UART2
  */
 uint32_t UART2_BaudRateGet(void);
@@ -332,6 +344,7 @@ uint32_t UART2_BaudRateGet(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns the error status of UART2
+ * @param    none
  * @return   Errors with masking as per \ref UART2_ERROR_MASKS
  */
 size_t UART2_ErrorGet(void);
@@ -351,6 +364,7 @@ void UART2_RxCompleteCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_RxCompleteCallbackRegister.
+ * @param    none
  * @return   none
  */
 void UART2_RxCompleteCallback(void);
@@ -370,6 +384,7 @@ void __attribute__((deprecated("\nThis will be removed in future MCC releases.")
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_TxCompleteCallbackRegister.
+ * @param    none
  * @return   none
  * @note            This callback is triggerred if there is data in the software buffer and there is atleast 
  *                  one byte space in hardware transmit FIFO 
@@ -391,6 +406,7 @@ void UART2_TxCollisionCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_TxCollisionCallbackRegister.
+ * @param    none
  * @return   none
  */
 void UART2_TxCollisionCallback(void);
@@ -410,6 +426,7 @@ void UART2_FramingErrorCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_FramingErrorCallbackRegister.
+ * @param    none
  * @return   none
  */
 void UART2_FramingErrorCallback(void);
@@ -429,6 +446,7 @@ void UART2_OverrunErrorCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_OverrunErrorCallbackRegister.
+ * @param    none
  * @return   none
  */
 void UART2_OverrunErrorCallback(void);
@@ -448,6 +466,7 @@ void UART2_ParityErrorCallbackRegister(void (*handler)(void));
  * @brief    This is the default callback with weak attribute. The user can 
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using UART2_ParityErrorCallbackRegister.
+ * @param    none
  * @return   none
  */
 void UART2_ParityErrorCallback(void);

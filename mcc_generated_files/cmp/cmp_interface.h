@@ -7,9 +7,9 @@
  *            
  * @brief     High Speed Analog Comparator with Slope Compensation DAC driver using dsPIC MCUs. 
  *            
- * @version   Firmware Driver Version 1.2.0
+ * @skipline @version   Firmware Driver Version 1.2.1
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.1
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */

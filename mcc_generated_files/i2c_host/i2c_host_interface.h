@@ -7,7 +7,9 @@
  * 
  * @brief     I2C driver for Host Mode using dsPIC MCUs
  *
- * @version   Driver Version 1.1.1
+ * @skipline @version   Firmware Driver Version 1.1.4
+ *
+ * @skipline @version   PLIB Version 2.2.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

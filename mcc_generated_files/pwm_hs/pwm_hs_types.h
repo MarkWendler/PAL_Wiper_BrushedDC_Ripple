@@ -7,9 +7,9 @@
  * 
  * @brief    This is the generated driver types header file for the PWM driver
  *
- * @version   Firmware Driver Version 1.1.5
+ * @skipline @version   Firmware Driver Version 1.1.6
  *
- * @version   PLIB Version 2.2.0
+ * @skipline @version   PLIB Version 2.3.1
  *
  * @skipline Device : dsPIC33CDVL64MC106
 */

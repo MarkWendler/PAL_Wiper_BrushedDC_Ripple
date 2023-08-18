@@ -7,9 +7,9 @@
  * 
  * @brief     This is the generated driver source file for TMR1 driver
  *
- * @version   Firmware Driver Version 1.5.0
+ * @skipline @version   Firmware Driver Version 1.5.1
  *
- * @version   PLIB Version 1.4.0
+ * @skipline @version   PLIB Version 1.5.2
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -70,7 +70,7 @@ const struct TIMER_INTERFACE Timer1 = {
 
 void TMR1_Initialize (void)
 {
-    //TCS FOSC/2; TSYNC disabled; TCKPS 1:8; TGATE disabled; TECS ; PRWIP Write complete; TMWIP Write complete; TMWDIS disabled; TSIDL disabled; TON disabled; 
+    //TCS FOSC/2; TSYNC disabled; TCKPS 1:8; TGATE disabled; TECS FOSC/2; PRWIP Write complete; TMWIP Write complete; TMWDIS disabled; TSIDL disabled; TON disabled; 
     T1CON = 0x10;
     //TMR 0x0; 
     TMR1 = 0x0;
@@ -79,7 +79,6 @@ void TMR1_Initialize (void)
     
     TMR1_TimeoutCallbackRegister(&TMR1_TimeoutCallback);
 
-    TMR1_Start();
 }
 
 void TMR1_Deinitialize (void)

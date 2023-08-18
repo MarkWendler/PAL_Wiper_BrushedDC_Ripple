@@ -8,9 +8,9 @@
  * @brief     Operational Amplifier Driver used for a wide variety of purposes, 
  *            including signal conditioning and filtering using dsPIC MCUs.
  *
- * @version   Firmware Driver Version 1.2.1
+ * @skipline @version   Firmware Driver Version 1.2.2
  *
- * @version   PLIB Version 1.3.0
+ * @skipline @version   PLIB Version 1.4.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */

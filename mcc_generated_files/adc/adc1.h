@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver header file for the ADC1 driver
  *            
- * @version   Firmware Driver Version 1.4.3
+ * @skipline @version   Firmware Driver Version 1.4.4
  *
- * @version   PLIB Version 2.3.0
+ * @skipline @version   PLIB Version 2.4.2
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -84,6 +84,7 @@ extern const struct ADC_INTERFACE ADC1;
  * @ingroup  adcdriver
  * @brief    Initializes ADC1 module, using the given initialization data
  *           This function must be called before any other ADC1 function is called
+ * @param    none
  * @return   none  
  */
 void ADC1_Initialize (void);
@@ -91,6 +92,7 @@ void ADC1_Initialize (void);
 /**
  * @ingroup  adcdriver
  * @brief    Deinitializes the ADC1 to POR values
+ * @param    none
  * @return   none  
  */
 void ADC1_Deinitialize(void);
@@ -100,6 +102,7 @@ void ADC1_Deinitialize(void);
  * @brief    This inline function enables the ADC1 module
  * @pre      \ref ADC1_Initialize function should have been 
  *           called  before calling this function.
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_Enable(void)
@@ -112,6 +115,7 @@ inline static void ADC1_Enable(void)
  * @brief    This inline function disables the ADC1 module
  * @pre      \ref ADC1_Initialize function should have been 
  *           called  before calling this function.
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_Disable(void)
@@ -124,6 +128,7 @@ inline static void ADC1_Disable(void)
  * @brief    This inline function sets software common trigger
  * @pre      \ref ADC1_Initialize function should have been 
  *           called before calling this function.
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_SoftwareTriggerEnable(void)
@@ -136,6 +141,7 @@ inline static void ADC1_SoftwareTriggerEnable(void)
  * @brief    This inline function resets software common trigger
  * @pre      ADC1_Initialize function should have been 
  *           called before calling this function.
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_SoftwareTriggerDisable(void)
@@ -245,6 +251,7 @@ inline static void ADC1_ResolutionSet(enum ADC_RESOLUTION_TYPE resolution)
 /**
  * @ingroup  adcdriver
  * @brief    This inline function enables the ADC1 interrupt
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_InterruptEnable(void)
@@ -255,6 +262,7 @@ inline static void ADC1_InterruptEnable(void)
 /**
  * @ingroup  adcdriver
  * @brief    This inline function disables the ADC1 interrupt
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_InterruptDisable(void)
@@ -265,6 +273,7 @@ inline static void ADC1_InterruptDisable(void)
 /**
  * @ingroup  adcdriver
  * @brief    Clears interrupt flag manually
+ * @param    none
  * @return   none  
  */
 inline static void ADC1_InterruptFlagClear(void)
@@ -297,6 +306,7 @@ void ADC1_CommonCallbackRegister(void(*callback)(void));
  * @ingroup  adcdriver
  * @brief    This is the default callback with weak attribute. The user can override and implement the default callback without weak attribute
  *           or can register a custom callback function using  ADC1_CommonCallbackRegister
+ * @param    none
  * @return   none  
  */
 void ADC1_CommonCallback(void);
@@ -307,6 +317,7 @@ void ADC1_CommonCallback(void);
  * @brief    This function is used to implement the tasks for polled implementations
  * @pre      \ref ADC1_Initialize() function should have been
  *           called before calling this function.
+ * @param    none
  * @return   none
  * @note     This function has to be polled to notify callbacks and clear 
  *           the interrupt flags in non-interrupt mode of ADC
@@ -491,6 +502,7 @@ void ADC1_ChannelTasks(enum ADC_CHANNEL channel);
  * @brief    Enables power for ADC1 shared Core
  *           This function is used to set the analog and digital power for 
  *           ADC1 shared Core.
+ * @param    none
  * @return   none  
  */
 void ADC1_SharedCorePowerEnable(void);

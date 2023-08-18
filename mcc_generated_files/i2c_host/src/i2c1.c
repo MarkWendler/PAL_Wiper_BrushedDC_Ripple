@@ -7,7 +7,9 @@
  * 
  * @brief     This is the generated driver source file for I2C1 driver
  *
- * @version   Driver Version 1.1.1
+ * @skipline @version   Firmware Driver Version 1.1.4
+ *
+ * @skipline @version   PLIB Version 2.2.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -159,7 +161,7 @@ static void I2C1_AddressConfiguration(uint16_t address, bool writeMode)
  @static   I2C Bus write collision clear
  @brief    Clears the I2C Bus write collision
 */
-static inline void I2C1_WriteCollisionStatusClear()
+static inline void I2C1_WriteCollisionStatusClear(void)
 {
     if(true == I2C1STATbits.IWCOL) 
     {
@@ -172,7 +174,7 @@ static inline void I2C1_WriteCollisionStatusClear()
  @static   I2C Bus receive overflow clear
  @brief    Clears the I2C Bus receive overflow
 */
-static inline void I2C1_RecevieOverFlowStatusClear()
+static inline void I2C1_RecevieOverFlowStatusClear(void)
 {
     if(true == I2C1STATbits.I2COV)
     {
@@ -185,7 +187,7 @@ static inline void I2C1_RecevieOverFlowStatusClear()
  @static   I2C Bus Bus collision clear
  @brief    Clears the I2C Bus collision.
 */
-static inline void I2C1_BusCollisionStatusClear()
+static inline void I2C1_BusCollisionStatusClear(void)
 {
     if(true == I2C1STATbits.BCL)
     {

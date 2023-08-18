@@ -63,7 +63,7 @@
           <itemPath>mcc_generated_files/uart/uart_types.h</itemPath>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f1" displayName="X2CScope" projectFiles="true">
+      <logicalFolder name="f1" displayName="X2Cscope" projectFiles="true">
         <itemPath>X2Cscope/X2Cscope.h</itemPath>
         <itemPath>X2Cscope/X2CscopeComm.h</itemPath>
       </logicalFolder>
@@ -137,7 +137,7 @@
           </logicalFolder>
         </logicalFolder>
       </logicalFolder>
-      <logicalFolder name="f1" displayName="X2CScope" projectFiles="true">
+      <logicalFolder name="f1" displayName="X2Cscope" projectFiles="true">
         <itemPath>X2Cscope/X2Cscope.c</itemPath>
         <itemPath>X2Cscope/X2CscopeComm.c</itemPath>
       </logicalFolder>
@@ -162,7 +162,7 @@
         <targetDevice>dsPIC33CDVL64MC106</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>ICD4Tool</platformTool>
+        <platformTool>pk4hybrid</platformTool>
         <languageToolchain>XC16</languageToolchain>
         <languageToolchainVersion>1.70</languageToolchainVersion>
         <platform>3</platform>

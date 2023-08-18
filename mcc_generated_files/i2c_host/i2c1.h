@@ -7,7 +7,9 @@
  * 
  * @brief     This is the generated driver header file for the I2C1 driver using CCL
  *
- * @version   Driver Version 1.1.1
+ * @skipline @version   Firmware Driver Version 1.1.4
+ *
+ * @skipline @version   PLIB Version 2.2.0
  *
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -98,6 +100,7 @@ extern const struct I2C_HOST_INTERFACE I2C1_Host;
 /**
  * @ingroup  i2chostdriver
  * @brief    Initializes the I2C1 module
+ * @param    none
  * @return   none
  */
 void I2C1_Initialize(void);
@@ -105,6 +108,7 @@ void I2C1_Initialize(void);
 /**
  * @ingroup  i2chostdriver
  * @brief    Deinitializes the I2C1 to POR values
+ * @param    none
  * @return   none
  */
 void I2C1_Deinitialize(void);
@@ -218,6 +222,7 @@ bool I2C1_TransferSetup(struct I2C_TRANSFER_SETUP* setup, uint32_t srcClkFreq);
  * @ingroup  i2chostdriver
  * @brief    Returns the error occurred during I2C Transmit and Receive
  * @pre      I2C1_Initialize() must be called for the associated function to work
+ * @param    none
  * @return   I2C_HOST_ERROR_NONE          - No Error
  * @return   I2C_HOST_ERROR_NACK          - Client returned NACK
  * @return   I2C_HOST_ERROR_BUS_COLLISION - Bus Collision Error
@@ -232,6 +237,7 @@ enum I2C_HOST_ERROR I2C1_ErrorGet(void);
  *           The library does not allow a data transfer operation if another 
  *           transfer  operation is already in progress.
  * @pre      I2C1_Initialize() must be called for the associated function to work
+ * @param    none
  * @return   true    - Busy
  * @return   false   - Not Busy
  */
@@ -255,6 +261,7 @@ void I2C1_CallbackRegister(void (*callback)(void));
  *           override and implement the default callback without weak attribute 
  *           or can register a custom callback function using I2C1_CallbackRegister.
  * @pre      I2C1_Initialize() must be called for the associated function to work
+ * @param    none
  * @return   none
  */
 void I2C1_Callback(void);

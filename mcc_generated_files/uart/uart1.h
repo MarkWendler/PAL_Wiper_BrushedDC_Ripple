@@ -7,9 +7,9 @@
  *            
  * @brief     This is the generated driver header file for the UART1 driver
  *            
- * @version   Firmware Driver Version 1.5.0
+ * @skipline @version   Firmware Driver Version 1.6.1
  *
- * @version   PLIB Version 1.4.0
+ * @skipline @version   PLIB Version 1.4.1
  *            
  * @skipline  Device : dsPIC33CDVL64MC106
 */
@@ -166,6 +166,7 @@ extern const struct UART_INTERFACE UART1_Drv;
 /**
  * @ingroup  uartdriver
  * @brief    Initializes the UART driver
+ * @param    none
  * @return   none
  */
 void UART1_Initialize(void);
@@ -173,6 +174,7 @@ void UART1_Initialize(void);
 /**
  * @ingroup  uartdriver
  * @brief    Deinitializes the UART to POR values
+ * @param    none
  * @return   none
  */
 void UART1_Deinitialize(void);
@@ -183,6 +185,7 @@ void UART1_Deinitialize(void);
  * @pre      UART1_Initialize function should have been called
  *           before calling this function. The transfer status should be checked
  *           to see  if the receiver is not empty before calling this function.
+ * @param    none
  * @return   A data byte received by the driver
  */
 uint8_t UART1_Read(void);
@@ -201,6 +204,7 @@ void UART1_Write(uint8_t data);
 /**
  * @ingroup  uartdriver
  * @brief    Returns a boolean value if data is available to read
+ * @param    none
  * @return   true  - Data available to read
  * @return   false - Data not available to read
  */
@@ -209,6 +213,7 @@ bool UART1_IsRxReady(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns a boolean value if data can be written
+ * @param    none
  * @return   true    - Data can be written
  * @return   false   - Data can not be written
  */
@@ -217,6 +222,7 @@ bool UART1_IsTxReady(void);
 /**
  * @ingroup  uartdriver
  * @brief    Indicates if all bytes have been transferred
+ * @param    none
  * @return   true    - All bytes transferred
  * @return   false   - Data transfer is pending
  */
@@ -225,6 +231,7 @@ bool UART1_IsTxDone(void);
 /**
  * @ingroup  uartdriver
  * @brief    Enables UART1 transmit 
+ * @param    none
  * @return   none
  */
 void UART1_TransmitEnable(void);
@@ -232,6 +239,7 @@ void UART1_TransmitEnable(void);
 /**
  * @ingroup  uartdriver
  * @brief    Disables UART1 transmit 
+ * @param    none
  * @return   none
  */
 void UART1_TransmitDisable(void);
@@ -248,6 +256,7 @@ void UART1_AutoBaudSet(bool enable);
 /**
  * @ingroup  uartdriver
  * @brief    Returns the status of Auto-Baud detection
+ * @param    none
  * @return   true    - Auto-Baud detection in progress or counter overflow occurred
  * @return   false   - Auto-Baud detection is complete or disabled
  */
@@ -256,6 +265,7 @@ bool UART1_AutoBaudQuery(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns enable state of the Auto-Baud feature
+ * @param    none
  * @return   true    - Auto-Baud is enabled
  * @return   false   - Auto-Baud is disabled
  */
@@ -273,6 +283,7 @@ void UART1_BRGCountSet(uint32_t brgValue);
 /**
  * @ingroup  uartdriver
  * @brief    Gets the BRG value of UART1
+ * @param    none
  * @return   Combined BRG value upto 20 bits
  */
 uint32_t UART1_BRGCountGet(void);
@@ -289,6 +300,7 @@ void UART1_BaudRateSet(uint32_t baudRate);
 /**
  * @ingroup  uartdriver
  * @brief    Gets the actual Baud-Rate of UART1
+ * @param    none
  * @return   Actual baud-rate of UART1
  */
 uint32_t UART1_BaudRateGet(void);
@@ -296,6 +308,7 @@ uint32_t UART1_BaudRateGet(void);
 /**
  * @ingroup  uartdriver
  * @brief    Returns the error status of UART1
+ * @param    none
  * @return   Errors with masking as per \ref UART1_ERROR_MASKS
  */
 size_t UART1_ErrorGet(void);
