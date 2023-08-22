@@ -30,16 +30,14 @@
 #include "X2Cscope/X2Cscope.h"
 #include "UART_debug.h"
 
-void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal);
-void User_TMR1_TimeoutCallback();
-void User_I2C1_Callback();
-
 #define HYSTERESIS_UPDATE_INTERVAL   80
 #define SPEED_MEASUREMENT_INTERVAL   25
 
 
 #define MAX_DUTY_CYCLE               4500
-#define MIN_DUTY_CYCLE               500
+#define MIN_DUTY_CYCLE               1000
+
+#define MOTOR_CURRENT_0              2048
 
 enum DEMO_STATE_MACHINE
 {
@@ -56,6 +54,10 @@ enum DEMO_STATE_MACHINE
 #include <libpic30.h>
 #include <stdio.h>
 
+
+void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal);
+void User_TMR1_TimeoutCallback();
+void User_I2C1_Callback();
 
 
 //--------- speed measurement variables --------------------
@@ -88,7 +90,7 @@ volatile uint16_t motor_speed                  = 0;
 volatile uint16_t DC_bus_voltage       = 0;
 volatile uint16_t Speed1_digital_input = 0;
 volatile uint16_t Brake_digital_input  = 0;
-//---------   --------------------
+//---------------------------------------------
 
 volatile uint16_t cmd_motor_speed_rpm = 0;
 volatile uint16_t cmd_motor_direction = 0;
@@ -96,28 +98,17 @@ volatile uint16_t cmd_motor_stop      = 0;
 
 volatile uint16_t cmd_motor_voltage_duty_cycle = 0; 
 volatile uint16_t motor_voltage_duty_cycle     = 0; 
-volatile uint16_t motor_voltage_slope_counter  = 0; 
 
 //---------   --------------------
 
 volatile uint16_t new_duty_cycle = 0;
 
-volatile uint16_t old_direction = 0;
-volatile uint16_t is_motor_run  = 0;
+volatile uint16_t motor_direction = 0;
+volatile uint16_t old_direction   = 0;
+volatile uint16_t is_motor_run    = 0;
 
-volatile uint16_t prev_io_state = 1;
-volatile uint16_t io_debounce = 0;
-volatile uint16_t test_voltage_duty_cycle = 0;
-volatile uint16_t test_direction = 0;
-//---------   --------------------
-
-// 1 milliseconds task variables
-//#define TASK_EXECUTION_PERIOD          500 // 500 ms
-//volatile uint16_t task_counter       = TASK_EXECUTION_PERIOD;
+//--------- Tasks variables  --------------------
 volatile uint16_t task_1ms_execute_flag  = 0;
-
-
-//---------  --------------------
 volatile uint16_t task_200ms_execute_flag  = 0;
 volatile uint16_t task_200ms_counter  = 0;
 
@@ -125,26 +116,23 @@ volatile uint16_t task_200ms_counter  = 0;
 volatile uint16_t hall_sensor_addr     = 0; //0x35; // 7-bit address; 8-bit address = 0x6A/0x6B
 volatile bool     hall_sensor_detected = false;
 uint8_t  hall_sensor_read_data[10];
-
 volatile bool IsSensorReadFinished   = false;
 volatile bool IsSensorReadInProgress = false;
-
 volatile struct I2C_TRANSFER_SETUP HallSensor_Setup;
-volatile uint32_t sysClk = FCY;
-//---------  --------------------
+volatile uint32_t sysClk = FCY/2;
 
+//--------- scaling factors --------------------
+float    K_dc_bus  = 0.00886230469f; //   V/bit   = 3.3V / (4096 * (1.8Kohms / (18 Kohms + 1.8 Kohms)))
+float    K_current = 0.01708984375f; //   A/bit   = 70 A / 4096
+float    K_duty_cycle = 100.0f / 5000.0f; //   %
+uint16_t K_speed   = 60*10/12;     //  50 rpm/ripple;  12 ripples / motor revolution
+//---------------------------------------------
 
-
+//--------- DEMO variables --------------------
 volatile enum DEMO_STATE_MACHINE  demo_status = DEMO_STOP;
 volatile enum DEMO_STATE_MACHINE  demo_status_old = DEMO_STOP;
 volatile uint16_t demo_counter = 40100;
-
-
-float K_dc_bus  = 0.00886230469f; //   V/bit  = 3.3V / (4096 * (1.8Kohms / (18 Kohms + 1.8 Kohms)))
-float K_current = 0.01708984375f; //   A/bit  = 70 A / 4096
-
-
-
+//---------------------------------------------
 
 /////////////////////////////////////////
 
@@ -163,6 +151,9 @@ void pwm_stop( void )
     PG2CONLbits.ON = 0;
 
     __delay_us(200);
+    
+    motor_current = MOTOR_CURRENT_0;
+    motor_speed   = 0;
 }
 
 void pwm_change_direction( uint16_t new_direction )
@@ -173,6 +164,9 @@ void pwm_change_direction( uint16_t new_direction )
         PG2CONLbits.ON = 0;
 
         __delay_us(200);
+        
+        motor_current = MOTOR_CURRENT_0;
+        motor_speed   = 0;
         
         if( new_direction == 0 )
         {
@@ -200,7 +194,7 @@ void pwm_change_direction( uint16_t new_direction )
     old_direction = new_direction;
 }
 
-void motor_command( uint16_t volt_duty_cycle, uint16_t direction)
+void motor_command( uint16_t volt_duty_cycle, uint16_t direction )
 {
     new_duty_cycle = volt_duty_cycle;
     
@@ -228,9 +222,14 @@ void motor_command( uint16_t volt_duty_cycle, uint16_t direction)
         PG1CONLbits.ON = 0;
         PG2CONLbits.ON = 0;
 
-        __delay_us(200);        
+        __delay_us(200);
+        
+        motor_current = MOTOR_CURRENT_0;
+        motor_speed   = 0;
     }
 //    old_direction = direction;
+    
+    motor_direction = direction;
 }
 
 void mcp8021_task_1ms()
@@ -350,16 +349,17 @@ void duty_cycle_slope_task_1ms()
             motor_voltage_duty_cycle -= 4;
     }
 
-    motor_voltage_slope_counter++;
+//    motor_voltage_slope_counter++;
     
-    if( motor_voltage_duty_cycle == MIN_DUTY_CYCLE )
+    if( ( motor_voltage_duty_cycle  ) == ( MIN_DUTY_CYCLE  ) ) // ignore the last 2 bits when compare because the duty increment is 4 !
     {
-        pwm_change_direction( test_direction );
+        pwm_change_direction( motor_direction );
         
         if( is_motor_run )
         {
             pwm_stop();
             is_motor_run = 0;
+            motor_voltage_duty_cycle = 0;
         }
     }
 }
@@ -453,6 +453,13 @@ int main(void)
     
     motor_voltage_duty_cycle = MIN_DUTY_CYCLE; //set the initial duty cycle
     
+    #if (RUN_ON_EVAL_BOARD == 1)
+        // pin B0 used as output test pin, only on evaluation board
+        TRISBbits.TRISB0 = 0;   // pin B0 = OUTPUT
+        ANSELBbits.ANSELB0 = 0; // pin B0 = ANALOG
+    #else
+    #endif // RUN_ON_EVAL_BOARD
+
     TMR1_Start();
 
     // Manually enable PWM to trigger ADC channels as MCC does not support by default
@@ -476,9 +483,7 @@ int main(void)
 
     while(1)
     {
-        //LATBbits.LATB0 = 1;
         X2CScope_Communicate(); //handles the communication with the MPLAB X plugin on the PC side
-        //LATBbits.LATB0 = 0;
 
         //////////////////// TASK - 1 ms
         if(task_1ms_execute_flag)
@@ -534,12 +539,14 @@ int main(void)
             printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state );
             printf(" MCP_WARNS= %04X,",     mcp8021_warnings );
             printf(" Demo_status= %d,",     demo_status );
-            printf(" Motor_Voltage= %u,",   motor_voltage_duty_cycle );
-            printf(" Speed= %u,",           motor_speed );
+            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle );
+            printf(" Speed= %u rpm,",       motor_speed    * K_speed );
             printf(" Current = %.2f A,",    (motor_current * K_current) - 35.0f );
             printf(" DC_bus = %.2f V,",     DC_bus_voltage * K_dc_bus  );
             printf(" Speed1_IN= %d,",       Speed1_digital_input );
             printf(" Brake_IN= %d",         Brake_digital_input );
+            printf(" mot_dir= %d",         motor_direction );
+            printf(" old_dir= %d",         old_direction );
             #if (RUN_ON_EVAL_BOARD == 1)
             #else
                 if( hall_sensor_detected )
@@ -665,11 +672,15 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
             digital_comparator_output = 0;
         }
         
-        if(speed_measurement_counter == SPEED_MEASUREMENT_INTERVAL) //verify if the second loop is done
+        if(speed_measurement_counter == SPEED_MEASUREMENT_INTERVAL) //
         {
-            // Speed Measurement Period = SPEED_MEASUREMENT_INTERVAL * HYSTERESIS_UPDATE_INTERVAL * PWM_PERIOD = 100 ms
+            // Speed Measurement Period = SPEED_MEASUREMENT_INTERVAL * HYSTERESIS_UPDATE_INTERVAL * PWM_PERIOD = 25 * 80 * 50us = 100 ms
             // Speed measurement, save the counted ripples
-            motor_speed = ripple_counter;
+            if (motor_current > (2048 + 17)) // measure the speed only if the current > 300mA
+            {
+                motor_speed = ripple_counter;
+            }
+            
             ripple_counter = 0;
             speed_measurement_counter = 0;
             current_pp = 4095; //reset the peak-to-peak value of the current

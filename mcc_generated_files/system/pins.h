@@ -45,57 +45,6 @@
 
 /**
  * @ingroup  pinsdriver
- * @brief    Sets the RB0 GPIO Pin which has a custom name of OUT_RB0 to High
- * @pre      The RB0 must be set as Output Pin             
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_SetHigh()          (_LATB0 = 1)
-
-/**
- * @ingroup  pinsdriver
- * @brief    Sets the RB0 GPIO Pin which has a custom name of OUT_RB0 to Low
- * @pre      The RB0 must be set as Output Pin
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_SetLow()           (_LATB0 = 0)
-
-/**
- * @ingroup  pinsdriver
- * @brief    Toggles the RB0 GPIO Pin which has a custom name of OUT_RB0
- * @pre      The RB0 must be set as Output Pin
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_Toggle()           (_LATB0 ^= 1)
-
-/**
- * @ingroup  pinsdriver
- * @brief    Reads the value of the RB0 GPIO Pin which has a custom name of OUT_RB0
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_GetValue()         _RB0
-
-/**
- * @ingroup  pinsdriver
- * @brief    Configures the RB0 GPIO Pin which has a custom name of OUT_RB0 as Input
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_SetDigitalInput()  (_TRISB0 = 1)
-
-/**
- * @ingroup  pinsdriver
- * @brief    Configures the RB0 GPIO Pin which has a custom name of OUT_RB0 as Output
- * @param    none
- * @return   none  
- */
-#define OUT_RB0_SetDigitalOutput() (_TRISB0 = 0)
-
-/**
- * @ingroup  pinsdriver
  * @brief    Sets the RC13 GPIO Pin which has a custom name of MCP802X_ENABLE to High
  * @pre      The RC13 must be set as Output Pin             
  * @param    none
