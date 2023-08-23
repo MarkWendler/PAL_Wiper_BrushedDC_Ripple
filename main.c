@@ -355,12 +355,12 @@ void duty_cycle_slope_task_1ms()
     {
         pwm_change_direction( motor_direction );
         
-        if( is_motor_run )
-        {
-            pwm_stop();
-            is_motor_run = 0;
-            motor_voltage_duty_cycle = 0;
-        }
+//        if( is_motor_run )
+//        {
+//            pwm_stop();
+//            is_motor_run = 0;
+//            motor_voltage_duty_cycle = 0;
+//        }
     }
 }
 
@@ -512,29 +512,35 @@ int main(void) {
         if ((mcp8021_communicate_status == MCP802X_READY &&
                 (firstStart == 0)
                 )) {
+            firstStart = 1;
             mcp8021_faults = 0;
+            motor_command(MAX_DUTY_CYCLE, 0);
+            
         }
-        if(mcp8021_faults == 0){
-            if ((demo_status != demo_status_old)
-                    ) {
-                switch (demo_status) {
-                    case DEMO_STOP:
-                        motor_command(0, 1);
-                        break;
-
-                    case DEMO_RUN_LEFT:
-                        motor_command(MAX_DUTY_CYCLE, 0);
-                        break;
-
-                    case DEMO_RUN_RIGHT:
-                        motor_command(MAX_DUTY_CYCLE, 1);
-                        break;
-
-                    default:
-                        break;
-                }
-                demo_status_old = demo_status;
-            }
+        if((mcp8021_faults == 0) && 
+            (mcp8021_communicate_status == MCP802X_READY)){
+            
+//            if ((demo_status != demo_status_old)
+//                    ) {
+//                switch (demo_status) {
+//                    case DEMO_STOP:
+//                        motor_command(0, 1);
+//                        break;
+//
+//                    case DEMO_RUN_LEFT:
+//                        motor_command(MAX_DUTY_CYCLE, 0);
+//                        break;
+//
+//                    case DEMO_RUN_RIGHT:
+//                        motor_command(MAX_DUTY_CYCLE, 1);
+//                        break;
+//
+//                    default:
+//                        break;
+//                }
+//                demo_status_old = demo_status;
+            
+//            }
         }
         else{
             motor_command(0, 1);
