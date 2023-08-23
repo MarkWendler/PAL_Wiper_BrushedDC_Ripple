@@ -480,7 +480,7 @@ int main(void) {
     __delay_us(100);
     MCP802X_u8ConfigSet(config1); //Set the basic configuration to the gate drive - Mandatory
 
-    printf("START\r\n");
+    //printf("START\r\n");
 
     //while( mcp8021_communicate_status != MCP802X_READY ){} //wait until the gate driver is in the READY state
 
@@ -553,25 +553,25 @@ int main(void) {
         if (task_200ms_execute_flag) {
             task_200ms_execute_flag = 0;
 
-            printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status);
-            printf(" MCP_FAULTS= %04X,", mcp8021_faults);
-            printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state);
-            printf(" MCP_WARNS= %04X,", mcp8021_warnings);
-            printf(" Demo_status= %d,", demo_status);
-            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle);
-            printf(" Speed= %u rpm,", motor_speed * K_speed);
-            printf(" Current = %.2f A,", (motor_current * K_current) - 35.0f);
-            printf(" DC_bus = %.2f V,", DC_bus_voltage * K_dc_bus);
-            printf(" Speed1_IN= %d,", Speed1_digital_input);
-            printf(" Brake_IN= %d", Brake_digital_input);
-            printf(" mot_dir= %d", motor_direction);
-            printf(" old_dir= %d", old_direction);
+//            printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status);
+//            printf(" MCP_FAULTS= %04X,", mcp8021_faults);
+//            printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state);
+//            printf(" MCP_WARNS= %04X,", mcp8021_warnings);
+//            printf(" Demo_status= %d,", demo_status);
+//            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle);
+//            printf(" Speed= %u rpm,", motor_speed * K_speed);
+//            printf(" Current = %.2f A,", (motor_current * K_current) - 35.0f);
+//            printf(" DC_bus = %.2f V,", DC_bus_voltage * K_dc_bus);
+//            printf(" Speed1_IN= %d,", Speed1_digital_input);
+//            printf(" Brake_IN= %d", Brake_digital_input);
+//            printf(" mot_dir= %d", motor_direction);
+//            printf(" old_dir= %d", old_direction);
 #if (RUN_ON_EVAL_BOARD == 1)
 #else
             if (hall_sensor_detected) {
-                printf(" Hall detected, Address= 0x%02X", hall_sensor_addr);
+                //printf(" Hall detected, Address= 0x%02X", hall_sensor_addr);
             } else {
-                printf(" Hall scanning...");
+                //printf(" Hall scanning...");
             }
 #endif // RUN_ON_EVAL_BOARD
         }
