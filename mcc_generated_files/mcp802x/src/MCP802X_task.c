@@ -30,7 +30,7 @@ static struct
     uint16_t DE2LastCmdSent;
     uint16_t u16IntervalCnt;
     uint16_t u16CmdInterval;
-    MCP802X_SCHED_MODE eOperationMode;
+//    MCP802X_SCHED_MODE eOperationMode;
     uint16_t u16FaultCnt;
     MCP802X_FAULT_FLAGS eFaults;
     uint16_t u16Warnings;
@@ -696,7 +696,8 @@ static void SEC_MCP802X MCP802X_vidRunAllCmds(void)
             }
         }
 
-        MCP802X_u8SetMode(CMD_IDLE); /* transfer completed */
+            MCP802X_u8SetMode(CMD_IDLE); /* transfer completed */
+
 
     }
     else

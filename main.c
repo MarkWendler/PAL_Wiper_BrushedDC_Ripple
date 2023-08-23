@@ -136,7 +136,7 @@ volatile uint16_t demo_counter = 40100;
 
 /////////////////////////////////////////
 
-
+bool firstStart = 0;
 
 void mcp8x_clear_fault()
 {
@@ -438,129 +438,139 @@ void I2C1_task()
     }
 }
 
-int main(void)
-{
+int main(void) {
     SYSTEM_Initialize();
     X2Cscope_Init();
-    
+
     // register the callback functions
-    TMR1_TimeoutCallbackRegister( User_TMR1_TimeoutCallback );
-    ADC1_ChannelCallbackRegister( User_ADC1_ChannelCallback );
-    I2C1_CallbackRegister( User_I2C1_Callback );
+    TMR1_TimeoutCallbackRegister(User_TMR1_TimeoutCallback);
+    ADC1_ChannelCallbackRegister(User_ADC1_ChannelCallback);
+    I2C1_CallbackRegister(User_I2C1_Callback);
 
     HallSensor_Setup.clkSpeed = 100000; //100kHz
     //I2C1_TransferSetup( &HallSensor_Setup, sysClk );
-    
+
     motor_voltage_duty_cycle = MIN_DUTY_CYCLE; //set the initial duty cycle
-    
-    #if (RUN_ON_EVAL_BOARD == 1)
-        // pin B0 used as output test pin, only on evaluation board
-        TRISBbits.TRISB0 = 0;   // pin B0 = OUTPUT
-        ANSELBbits.ANSELB0 = 0; // pin B0 = ANALOG
-    #else
-    #endif // RUN_ON_EVAL_BOARD
+
+#if (RUN_ON_EVAL_BOARD == 1)
+    // pin B0 used as output test pin, only on evaluation board
+    TRISBbits.TRISB0 = 0; // pin B0 = OUTPUT
+    ANSELBbits.ANSELB0 = 0; // pin B0 = ANALOG
+#else
+#endif // RUN_ON_EVAL_BOARD
 
     TMR1_Start();
 
     // Manually enable PWM to trigger ADC channels as MCC does not support by default
-    #if (RUN_ON_EVAL_BOARD == 1)
-        PWM_Trigger1Enable( PWM_GENERATOR_2,PWM_TRIGGER_COMPARE_A ); 
-    #else
-        PWM_Trigger1Enable( PWM_GENERATOR_2,PWM_TRIGGER_COMPARE_A ); 
-    #endif // RUN_ON_EVAL_BOARD
-   
+#if (RUN_ON_EVAL_BOARD == 1)
+    PWM_Trigger1Enable(PWM_GENERATOR_2, PWM_TRIGGER_COMPARE_A);
+#else
+    PWM_Trigger1Enable(PWM_GENERATOR_2, PWM_TRIGGER_COMPARE_A);
+#endif // RUN_ON_EVAL_BOARD
+
     PG2TRIGB = PG2PER; // sampling point for the motor current at middle of PWM pulse
-    PWM_Trigger2Enable( PWM_GENERATOR_2, PWM_TRIGGER_COMPARE_B ); //enable the sampling point for the motor current 
-    
+    PWM_Trigger2Enable(PWM_GENERATOR_2, PWM_TRIGGER_COMPARE_B); //enable the sampling point for the motor current 
+
+
+    MCP802X_ENABLE_SetHigh();
+    __delay_us(100);
+    MCP802X_ENABLE_SetLow();
+    __delay_us(100);
+    MCP802X_ENABLE_SetHigh();
+    __delay_us(100);
     MCP802X_u8ConfigSet(config1); //Set the basic configuration to the gate drive - Mandatory
-    MCP802X_ENABLE_SetHigh();     //enable the gate driver
-    
+
     printf("START\r\n");
-    
+
     //while( mcp8021_communicate_status != MCP802X_READY ){} //wait until the gate driver is in the READY state
-    
+
     demo_status = DEMO_RUN_LEFT;
 
-    while(1)
-    {
-        X2CScope_Communicate(); //handles the communication with the MPLAB X plugin on the PC side
-
+    while (1) {
         //////////////////// TASK - 1 ms
-        if(task_1ms_execute_flag)
-        {
+        if (task_1ms_execute_flag) {
             task_1ms_execute_flag = 0;
-            
+
             mcp8021_task_1ms();
-            
+
             app_task_1ms();
-            
+
             duty_cycle_slope_task_1ms();
         }
         //////////////////// 
-        
-        #if (RUN_ON_EVAL_BOARD == 1)
 
-        #else
-            //I2C1_task();
-            I2C1_scan_addresses_task();
-        #endif // RUN_ON_EVAL_BOARD
-        
+        X2CScope_Communicate(); //handles the communication with the MPLAB X plugin on the PC side
+
+#if (RUN_ON_EVAL_BOARD == 1)
+
+#else
+        //I2C1_task();
+        I2C1_scan_addresses_task();
+#endif // RUN_ON_EVAL_BOARD
+
         //////////////////// 
-
-        if( demo_status != demo_status_old )
-        {
-            switch( demo_status )
-            {
-                case DEMO_STOP:
-                        motor_command( 0, 1 );
+        if ((mcp8021_communicate_status == MCP802X_READY &&
+                (firstStart == 0)
+                )) {
+            mcp8021_faults = 0;
+        }
+        if(mcp8021_faults == 0){
+            if ((demo_status != demo_status_old)
+                    ) {
+                switch (demo_status) {
+                    case DEMO_STOP:
+                        motor_command(0, 1);
                         break;
 
-                case DEMO_RUN_LEFT:
-                        motor_command( MAX_DUTY_CYCLE, 0 );
+                    case DEMO_RUN_LEFT:
+                        motor_command(MAX_DUTY_CYCLE, 0);
                         break;
 
-                case DEMO_RUN_RIGHT:
-                        motor_command( MAX_DUTY_CYCLE, 1 );
+                    case DEMO_RUN_RIGHT:
+                        motor_command(MAX_DUTY_CYCLE, 1);
                         break;
 
-                default:
+                    default:
                         break;
+                }
+                demo_status_old = demo_status;
             }
-            demo_status_old = demo_status;
         }
-        
+        else{
+            motor_command(0, 1);
+        }
+         
+
+
+
         //////////////////// TASK - 200 ms
-        if( task_200ms_execute_flag )
-        {
+        if (task_200ms_execute_flag) {
             task_200ms_execute_flag = 0;
-            
-            printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status );
-            printf(" MCP_FAULTS= %04X,",    mcp8021_faults );
-            printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state );
-            printf(" MCP_WARNS= %04X,",     mcp8021_warnings );
-            printf(" Demo_status= %d,",     demo_status );
-            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle );
-            printf(" Speed= %u rpm,",       motor_speed    * K_speed );
-            printf(" Current = %.2f A,",    (motor_current * K_current) - 35.0f );
-            printf(" DC_bus = %.2f V,",     DC_bus_voltage * K_dc_bus  );
-            printf(" Speed1_IN= %d,",       Speed1_digital_input );
-            printf(" Brake_IN= %d",         Brake_digital_input );
-            printf(" mot_dir= %d",         motor_direction );
-            printf(" old_dir= %d",         old_direction );
-            #if (RUN_ON_EVAL_BOARD == 1)
-            #else
-                if( hall_sensor_detected )
-                {
-                    printf(" Hall detected, Address= 0x%02X", hall_sensor_addr );
-                }
-                else
-                {
-                    printf(" Hall scanning..." );
-                }
-            #endif // RUN_ON_EVAL_BOARD
+
+            printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status);
+            printf(" MCP_FAULTS= %04X,", mcp8021_faults);
+            printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state);
+            printf(" MCP_WARNS= %04X,", mcp8021_warnings);
+            printf(" Demo_status= %d,", demo_status);
+            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle);
+            printf(" Speed= %u rpm,", motor_speed * K_speed);
+            printf(" Current = %.2f A,", (motor_current * K_current) - 35.0f);
+            printf(" DC_bus = %.2f V,", DC_bus_voltage * K_dc_bus);
+            printf(" Speed1_IN= %d,", Speed1_digital_input);
+            printf(" Brake_IN= %d", Brake_digital_input);
+            printf(" mot_dir= %d", motor_direction);
+            printf(" old_dir= %d", old_direction);
+#if (RUN_ON_EVAL_BOARD == 1)
+#else
+            if (hall_sensor_detected) {
+                printf(" Hall detected, Address= 0x%02X", hall_sensor_addr);
+            } else {
+                printf(" Hall scanning...");
+            }
+#endif // RUN_ON_EVAL_BOARD
         }
         //////////////////// 
-    }    
+    }
 }
 
 
