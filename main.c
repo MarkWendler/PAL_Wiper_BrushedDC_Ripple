@@ -18,6 +18,7 @@
     EXCEED AMOUNT OF FEES, IF ANY, YOU PAID DIRECTLY TO MICROCHIP FOR 
     THIS SOFTWARE.
 */
+#include "UART_debug.h"
 #include "mcc_generated_files/system/system.h"
 #include "mcc_generated_files/mcp802x/MCP802X_task.h"
 #include "mcc_generated_files/timer/tmr1.h"
@@ -27,8 +28,9 @@
 #include "mcc_generated_files/uart/uart1.h"
 #include "mcc_generated_files/i2c_host/i2c1.h"
 #include "mcc_generated_files/i2c_host/i2c_host_types.h"
-#include "X2Cscope/X2Cscope.h"
-#include "UART_debug.h"
+#if (X2CSCOPE_ENABLE == 1)
+	#include "X2Cscope/X2Cscope.h"
+#endif // X2CSCOPE_ENABLE
 
 #define HYSTERESIS_UPDATE_INTERVAL   80
 #define SPEED_MEASUREMENT_INTERVAL   25
@@ -44,6 +46,13 @@ enum DEMO_STATE_MACHINE
     DEMO_STOP = 0,
     DEMO_RUN_LEFT,
     DEMO_RUN_RIGHT
+};
+
+enum MOTOR_COMMAND
+{
+    MOTOR_COMMAND_STOP = 0,
+    MOTOR_COMMAND_RUN_LEFT,
+    MOTOR_COMMAND_RUN_RIGHT
 };
 
 #define START_TIMER_MS(tmr_counter, x) tmr_counter = x;
@@ -69,6 +78,10 @@ volatile uint16_t current_pp = 4095;
 volatile uint16_t ripple_counter = 0; 
 volatile uint16_t hyst_thresh_hi = 0; 
 volatile uint16_t hyst_thresh_lo = 0; 
+volatile uint16_t thrsh_HI_multiplier = 0; // 32/40 = 80%
+volatile uint16_t thrsh_HI_divider    = 0;
+volatile uint16_t thrsh_LO_multiplier = 0;  // 1/4 = 25%
+volatile uint16_t thrsh_LO_divider    = 0;
 volatile uint16_t digital_comparator_output = 0; // debug & verification variable
 volatile uint16_t new_speed_flag = 0;
 
@@ -93,19 +106,16 @@ volatile uint16_t Brake_digital_input  = 0;
 //---------------------------------------------
 
 volatile uint16_t cmd_motor_speed_rpm = 0;
-volatile uint16_t cmd_motor_direction = 0;
 volatile uint16_t cmd_motor_stop      = 0;
 
 volatile uint16_t cmd_motor_voltage_duty_cycle = 0; 
 volatile uint16_t motor_voltage_duty_cycle     = 0; 
 
-//---------   --------------------
+//volatile uint16_t new_duty_cycle = 0;
 
-volatile uint16_t new_duty_cycle = 0;
-
-volatile uint16_t motor_direction = 0;
-volatile uint16_t old_direction   = 0;
-volatile uint16_t is_motor_run    = 0;
+volatile enum MOTOR_COMMAND dir_pwm            = MOTOR_COMMAND_STOP;
+volatile enum MOTOR_COMMAND last_motor_command = MOTOR_COMMAND_STOP;
+volatile uint16_t pwm_enabled    = 0;
 
 //--------- Tasks variables  --------------------
 volatile uint16_t task_1ms_execute_flag  = 0;
@@ -149,6 +159,7 @@ void pwm_stop( void )
 {
     PG1CONLbits.ON = 0;
     PG2CONLbits.ON = 0;
+    pwm_enabled = 0;
 
     __delay_us(200);
     
@@ -156,28 +167,61 @@ void pwm_stop( void )
     motor_speed   = 0;
 }
 
-void pwm_change_direction( uint16_t new_direction )
+
+void set_speed_measurement_thresholds( enum MOTOR_COMMAND mot_cmd )
 {
-    if ( old_direction != new_direction )
+    switch( mot_cmd )
+    {
+        case MOTOR_COMMAND_RUN_LEFT:
+            {
+                thrsh_HI_multiplier = 32; // 32/40 = 80%
+                thrsh_HI_divider    = 40;
+                thrsh_LO_multiplier = 1;  // 1/4 = 25%
+                thrsh_LO_divider    = 4;
+            }
+            break;
+            
+        case MOTOR_COMMAND_RUN_RIGHT:
+            {
+                thrsh_HI_multiplier = 32; // 32/40 = 80%
+                thrsh_HI_divider    = 40;
+                thrsh_LO_multiplier = 1;  // 1/4 = 25%
+                thrsh_LO_divider    = 4;
+            }
+            break;
+            
+        case MOTOR_COMMAND_STOP:
+                // Do not change anything
+            break;
+    }
+}
+
+void pwm_set_direction( enum MOTOR_COMMAND mot_cmd )
+{
+    //if ( old_direction != new_direction )
     {
         PG1CONLbits.ON = 0;
         PG2CONLbits.ON = 0;
+        pwm_enabled = 0;
 
         __delay_us(200);
         
         motor_current = MOTOR_CURRENT_0;
         motor_speed   = 0;
         
-        if( new_direction == 0 )
+        if( mot_cmd == MOTOR_COMMAND_RUN_LEFT )
         {
+            dir_pwm = mot_cmd;
             PG1IOCONLbits.OVRENH = 0;
             PG1IOCONLbits.OVRENL = 0;
 
             PG2IOCONLbits.OVRENH = 1;
             PG2IOCONLbits.OVRENL = 1;     
         }
-        else
+        
+        if( mot_cmd == MOTOR_COMMAND_RUN_RIGHT )
         {
+            dir_pwm = mot_cmd;
             PG1IOCONLbits.OVRENH = 1;
             PG1IOCONLbits.OVRENL = 1;
 
@@ -189,21 +233,18 @@ void pwm_change_direction( uint16_t new_direction )
 
         PG1CONLbits.ON = 1;
         PG2CONLbits.ON = 1;
+        pwm_enabled = 1;
     }
-    
-    old_direction = new_direction;
 }
 
-void motor_command( uint16_t volt_duty_cycle, uint16_t direction )
+void motor_command( uint16_t volt_duty_cycle, enum MOTOR_COMMAND mot_cmd )
 {
-    new_duty_cycle = volt_duty_cycle;
+volatile uint16_t new_duty_cycle = volt_duty_cycle;
     
     if( new_duty_cycle >= 0)
     {
-        PG1CONLbits.ON = 1;
-        PG2CONLbits.ON = 1;
-        
-        is_motor_run = 1;
+//        PG1CONLbits.ON = 1;
+//        PG2CONLbits.ON = 1;
         
         if( new_duty_cycle > MAX_DUTY_CYCLE )
         {
@@ -219,17 +260,38 @@ void motor_command( uint16_t volt_duty_cycle, uint16_t direction )
     }
     else
     {
-        PG1CONLbits.ON = 0;
-        PG2CONLbits.ON = 0;
+//        PG1CONLbits.ON = 0;
+//        PG2CONLbits.ON = 0;
 
         __delay_us(200);
         
         motor_current = MOTOR_CURRENT_0;
         motor_speed   = 0;
     }
-//    old_direction = direction;
     
-    motor_direction = direction;
+    switch( mot_cmd )
+    {
+        case MOTOR_COMMAND_RUN_LEFT:
+        case MOTOR_COMMAND_RUN_RIGHT:
+            {
+                set_speed_measurement_thresholds( mot_cmd );
+                pwm_set_direction( mot_cmd );
+            }
+            break;
+
+        case MOTOR_COMMAND_STOP:
+            break;
+
+        default:
+                break;
+    }
+    
+    last_motor_command = mot_cmd;
+    
+//    if( mot_cmd != -1) // stop
+//    {
+//        pwm_set_direction( direction );
+//    }
 }
 
 void mcp8021_task_1ms()
@@ -260,6 +322,10 @@ void mcp8021_task_1ms()
 void app_task_1ms()
 {
     demo_counter--;
+    if ( demo_counter == 0 )
+    {
+        demo_counter = 40100;  // restart counting
+    }
     
     // DEMO 
     // for 10 seconds the MOTOR RUN LEFT direction
@@ -287,11 +353,6 @@ void app_task_1ms()
 
         default:
                 break;
-    }
-
-    if ( demo_counter == 0 )
-    {
-        demo_counter = 40100;  // restart counting
     }
 
 #if (RUN_ON_EVAL_BOARD == 1)
@@ -349,18 +410,13 @@ void duty_cycle_slope_task_1ms()
             motor_voltage_duty_cycle -= 4;
     }
 
-//    motor_voltage_slope_counter++;
-    
-    if( ( motor_voltage_duty_cycle  ) == ( MIN_DUTY_CYCLE  ) ) // ignore the last 2 bits when compare because the duty increment is 4 !
+    if( motor_voltage_duty_cycle == MIN_DUTY_CYCLE ) // ignore the last 2 bits when compare because the duty increment is 4 !
     {
-        pwm_change_direction( motor_direction );
-        
-//        if( is_motor_run )
-//        {
-//            pwm_stop();
-//            is_motor_run = 0;
-//            motor_voltage_duty_cycle = 0;
-//        }
+        if( last_motor_command == MOTOR_COMMAND_STOP )
+        {
+            if( pwm_enabled )
+                pwm_stop();
+        }
     }
 }
 
@@ -440,7 +496,9 @@ void I2C1_task()
 
 int main(void) {
     SYSTEM_Initialize();
-    X2Cscope_Init();
+    #if (X2CSCOPE_ENABLE == 1)
+        X2Cscope_Init();
+    #endif // X2CSCOPE_ENABLE
 
     // register the callback functions
     TMR1_TimeoutCallbackRegister(User_TMR1_TimeoutCallback);
@@ -480,11 +538,14 @@ int main(void) {
     __delay_us(100);
     MCP802X_u8ConfigSet(config1); //Set the basic configuration to the gate drive - Mandatory
 
-    //printf("START\r\n");
+    #if (X2CSCOPE_ENABLE == 1)
+    #else
+        printf("START\r\n");
+    #endif // X2CSCOPE_ENABLE
 
     //while( mcp8021_communicate_status != MCP802X_READY ){} //wait until the gate driver is in the READY state
 
-    demo_status = DEMO_RUN_LEFT;
+    demo_status = DEMO_STOP;
 
     while (1) {
         //////////////////// TASK - 1 ms
@@ -499,7 +560,9 @@ int main(void) {
         }
         //////////////////// 
 
+    #if (X2CSCOPE_ENABLE == 1)
         X2CScope_Communicate(); //handles the communication with the MPLAB X plugin on the PC side
+    #endif // X2CSCOPE_ENABLE
 
 #if (RUN_ON_EVAL_BOARD == 1)
 
@@ -514,36 +577,36 @@ int main(void) {
                 )) {
             firstStart = 1;
             mcp8021_faults = 0;
-            motor_command(MAX_DUTY_CYCLE, 0);
+            //motor_command(MAX_DUTY_CYCLE, MOTOR_COMMAND_RUN_LEFT );
             
         }
         if((mcp8021_faults == 0) && 
             (mcp8021_communicate_status == MCP802X_READY)){
-            
-//            if ((demo_status != demo_status_old)
-//                    ) {
-//                switch (demo_status) {
-//                    case DEMO_STOP:
-//                        motor_command(0, 1);
-//                        break;
-//
-//                    case DEMO_RUN_LEFT:
-//                        motor_command(MAX_DUTY_CYCLE, 0);
-//                        break;
-//
-//                    case DEMO_RUN_RIGHT:
-//                        motor_command(MAX_DUTY_CYCLE, 1);
-//                        break;
-//
-//                    default:
-//                        break;
-//                }
-//                demo_status_old = demo_status;
-            
-//            }
+
+            if ((demo_status != demo_status_old)
+                    ) {
+                switch (demo_status) {
+                    case DEMO_STOP:
+                        motor_command( 0, MOTOR_COMMAND_STOP);
+                        break;
+
+                    case DEMO_RUN_LEFT:
+                        motor_command( MAX_DUTY_CYCLE, MOTOR_COMMAND_RUN_LEFT );
+                        break;
+
+                    case DEMO_RUN_RIGHT:
+                        motor_command( MAX_DUTY_CYCLE, MOTOR_COMMAND_RUN_RIGHT );
+                        break;
+
+                    default:
+                        break;
+                }
+                demo_status_old = demo_status;
+            }
         }
-        else{
-            motor_command(0, 1);
+        else
+        {
+            // motor_command(0, -1); // stop
         }
          
 
@@ -553,26 +616,37 @@ int main(void) {
         if (task_200ms_execute_flag) {
             task_200ms_execute_flag = 0;
 
-//            printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status);
-//            printf(" MCP_FAULTS= %04X,", mcp8021_faults);
-//            printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state);
-//            printf(" MCP_WARNS= %04X,", mcp8021_warnings);
-//            printf(" Demo_status= %d,", demo_status);
-//            printf(" Motor_DutyCycle= %.1f %%,", motor_voltage_duty_cycle * K_duty_cycle);
-//            printf(" Speed= %u rpm,", motor_speed * K_speed);
-//            printf(" Current = %.2f A,", (motor_current * K_current) - 35.0f);
-//            printf(" DC_bus = %.2f V,", DC_bus_voltage * K_dc_bus);
-//            printf(" Speed1_IN= %d,", Speed1_digital_input);
-//            printf(" Brake_IN= %d", Brake_digital_input);
-//            printf(" mot_dir= %d", motor_direction);
-//            printf(" old_dir= %d", old_direction);
+            #if (X2CSCOPE_ENABLE == 1)
+
+            #else
+                printf("\r\nMCP_Status= %04X,", mcp8021_communicate_status);
+                printf(" MCP_FAULTS= %04X,", mcp8021_faults);
+                printf(" MCP_fault_PIN= %04X,", mcp8021_fault_pin_state);
+                printf(" MCP_WARNS= %04X,", mcp8021_warnings);
+                printf(" Demo_status= %d,", demo_status);
+                printf(" PWM= %d",  pwm_enabled);
+                if( pwm_enabled )
+                    printf(" Motor_DutyCycle= %4.1f %%,", motor_voltage_duty_cycle * K_duty_cycle);
+                else
+                    printf(" Motor_DutyCycle= ---- %%," );
+                printf(" Speed= %4u rpm,", motor_speed * K_speed);
+                printf(" Current = %6.2f A,", (motor_current * K_current) - ((2048 * K_current)));
+                printf(" DC_bus = %5.2f V,", DC_bus_voltage * K_dc_bus);
+                printf(" Speed1_IN= %d,", Speed1_digital_input);
+                printf(" Brake_IN= %d", Brake_digital_input);
+    //            printf(" mot_cmd= %d",  last_motor_command );
+                printf(" dir_pwm= %d", dir_pwm);
+            #endif // X2CSCOPE_ENABLE
 #if (RUN_ON_EVAL_BOARD == 1)
 #else
-            if (hall_sensor_detected) {
-                //printf(" Hall detected, Address= 0x%02X", hall_sensor_addr);
-            } else {
-                //printf(" Hall scanning...");
+            #if (X2CSCOPE_ENABLE == 1)
+            #else
+                if (hall_sensor_detected) {
+                    //printf(" Hall detected, Address= 0x%02X", hall_sensor_addr);
+                } else {
+                    //printf(" Hall scanning...");
             }
+            #endif // X2CSCOPE_ENABLE
 #endif // RUN_ON_EVAL_BOARD
         }
         //////////////////// 
@@ -670,15 +744,18 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
             // Stage 2: Update the hysteresis thresholds
             speed_measurement_counter++;
             current_pp = current_max - current_min; // current peak-peak
-            
+            thrsh_HI_multiplier = 32;
+            thrsh_HI_divider = 40;
+            thrsh_LO_multiplier = 1;
+            thrsh_LO_divider = 4;
             // hyst_thresh_hi = current_min + 80% * current_pp   ( empirical determination! )
-            hyst_thresh_hi = 32*current_pp;
-            hyst_thresh_hi = hyst_thresh_hi/40;
+            hyst_thresh_hi = thrsh_HI_multiplier*current_pp;
+            hyst_thresh_hi = hyst_thresh_hi/thrsh_HI_divider;
             hyst_thresh_hi = hyst_thresh_hi + current_min;
             
             // hyst_thresh_lo = current_min + 25% * current_pp   ( empirical determination! )
-            hyst_thresh_lo = current_pp;
-            hyst_thresh_lo = hyst_thresh_lo/4;
+            hyst_thresh_lo = thrsh_LO_multiplier*current_pp;
+            hyst_thresh_lo = hyst_thresh_lo/thrsh_LO_divider;
             hyst_thresh_lo = hyst_thresh_lo + current_min;
             
             hysteresis_update_counter = 0;           
@@ -706,7 +783,9 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
         //////////////////// SPEED MEASUREMENT - END
         
 
+    #if (X2CSCOPE_ENABLE == 1)
         X2CScope_Update(); //This is the sample point of the scope at every 50us
+    #endif // X2CSCOPE_ENABLE
         
     #if (RUN_ON_EVAL_BOARD == 1)
 //            LATBbits.LATB0 = 0;
