@@ -78,11 +78,19 @@ volatile uint16_t current_pp = 4095;
 volatile uint16_t ripple_counter = 0; 
 volatile uint16_t hyst_thresh_hi = 0; 
 volatile uint16_t hyst_thresh_lo = 0; 
-volatile uint16_t thrsh_HI_multiplier = 0; // 32/40 = 80%
+volatile uint16_t thrsh_HI_multiplier = 0;
 volatile uint16_t thrsh_HI_divider    = 0;
-volatile uint16_t thrsh_LO_multiplier = 0;  // 1/4 = 25%
+volatile uint16_t thrsh_LO_multiplier = 0;
 volatile uint16_t thrsh_LO_divider    = 0;
 volatile uint16_t digital_comparator_output = 0; // debug & verification variable
+volatile uint16_t debug_thresh_hi = 0; // debug & verification variable
+volatile uint16_t debug_thresh_lo = 0; // debug & verification variable
+
+volatile uint16_t current_average_index = 0; 
+volatile uint16_t current_average5      = 0; 
+volatile uint16_t current_buff[5]; 
+volatile uint16_t i     = 0; 
+
 volatile uint16_t new_speed_flag = 0;
 
 //--------- gate driver status reading implementation --------------------
@@ -174,7 +182,7 @@ void set_speed_measurement_thresholds( enum MOTOR_COMMAND mot_cmd )
     {
         case MOTOR_COMMAND_RUN_LEFT:
             {
-                thrsh_HI_multiplier = 32; // 32/40 = 80%
+                thrsh_HI_multiplier = 24; // 24/40 = 60%
                 thrsh_HI_divider    = 40;
                 thrsh_LO_multiplier = 1;  // 1/4 = 25%
                 thrsh_LO_divider    = 4;
@@ -183,7 +191,7 @@ void set_speed_measurement_thresholds( enum MOTOR_COMMAND mot_cmd )
             
         case MOTOR_COMMAND_RUN_RIGHT:
             {
-                thrsh_HI_multiplier = 32; // 32/40 = 80%
+                thrsh_HI_multiplier = 24; // 24/40 = 60%
                 thrsh_HI_divider    = 40;
                 thrsh_LO_multiplier = 1;  // 1/4 = 25%
                 thrsh_LO_divider    = 4;
@@ -712,27 +720,42 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
 
         //////////////////// SPEED MEASUREMENT - START
         
+        current_buff[ current_average_index ] = motor_current;
+        current_average_index++;
+
+        if( current_average_index == 5 )
+        {
+            current_average_index = 0;
+            current_average5     = 0; 
+
+            for( i=0; i<5; i++)
+            {
+                current_average5 += current_buff[ i ];
+            }
+            current_average5 = current_average5/5;
+        }
+            
         if(hysteresis_update_counter < HYSTERESIS_UPDATE_INTERVAL) // Stage 1: Detect the minimum and maximum motor current values
         {
             // Update Hysteresis Thresholds Period = HYSTERESIS_UPDATE_INTERVAL * PWM_PERIOD = 4000 us
             // Detect the minimum and maximum motor current values
             hysteresis_update_counter++;
-            if(motor_current < current_min)
+            if(current_average5 < current_min)
             {
-                current_min = motor_current;
+                current_min = current_average5;
             }
             
-            if(motor_current > current_max)
+            if(current_average5 > current_max)
             {
-                current_max = motor_current;
+                current_max = current_average5;
             }            
             
-            if((motor_current > hyst_thresh_hi) && digital_comparator_output == 0) 
+            if((current_average5 > hyst_thresh_hi) && digital_comparator_output == 0) 
             {
                 digital_comparator_output = 1; //reset the state of the comparator
             }
             
-            if(motor_current < hyst_thresh_lo && digital_comparator_output == 1)
+            if(current_average5 < hyst_thresh_lo && digital_comparator_output == 1)
             {
                 // complete pulse on comparator output
                 ripple_counter++;   // count a new current ripple
@@ -744,10 +767,7 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
             // Stage 2: Update the hysteresis thresholds
             speed_measurement_counter++;
             current_pp = current_max - current_min; // current peak-peak
-            thrsh_HI_multiplier = 32;
-            thrsh_HI_divider = 40;
-            thrsh_LO_multiplier = 1;
-            thrsh_LO_divider = 4;
+
             // hyst_thresh_hi = current_min + 80% * current_pp   ( empirical determination! )
             hyst_thresh_hi = thrsh_HI_multiplier*current_pp;
             hyst_thresh_hi = hyst_thresh_hi/thrsh_HI_divider;
@@ -763,6 +783,8 @@ void User_ADC1_ChannelCallback(enum ADC_CHANNEL channel, uint16_t adcVal)
             current_max = 0;
             current_min = 4095;
             digital_comparator_output = 0;
+            debug_thresh_hi = hyst_thresh_hi;
+            debug_thresh_lo = hyst_thresh_lo;
         }
         
         if(speed_measurement_counter == SPEED_MEASUREMENT_INTERVAL) //
