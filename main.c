@@ -36,7 +36,7 @@
 #define SPEED_MEASUREMENT_INTERVAL   25
 
 
-#define MAX_DUTY_CYCLE               4500
+#define MAX_DUTY_CYCLE               4900
 #define MIN_DUTY_CYCLE               1000
 
 #define MOTOR_CURRENT_0              2048
@@ -599,7 +599,7 @@ int main(void) {
                         break;
 
                     case DEMO_RUN_LEFT:
-                        motor_command( MAX_DUTY_CYCLE, MOTOR_COMMAND_RUN_LEFT );
+                        motor_command( MAX_DUTY_CYCLE, MOTOR_COMMAND_RUN_RIGHT );
                         break;
 
                     case DEMO_RUN_RIGHT:

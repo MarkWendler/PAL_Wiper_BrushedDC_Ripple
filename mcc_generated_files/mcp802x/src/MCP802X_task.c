@@ -86,7 +86,7 @@ static const MCP802X_CONFIG_STRUCT_t MCP802X_Config[MCP802X_MAX_CONFIG] = {
         .EXTSC = 0u,
         .EXTOC = MCP802X_OVERCURRENT_1000V,
         .DRVBL = MCP802X_BLANKING_4000,
-        .DEADTIME = MCP802X_DEADTIME_2000
+        .DEADTIME = MCP802X_DEADTIME_500
     },
 };
 /* static function prototypes */
